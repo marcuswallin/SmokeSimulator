@@ -7,6 +7,7 @@
 #include "MicroGlut.h"
 #include "GL_utilities.h"
 #include "display.c"
+//#include "smoke.c"
 
 void timer(int i)
 {
@@ -16,6 +17,9 @@ void timer(int i)
 
 int main(int argc, char **argv)
 {
+
+	//smoke s = create_smoke(10.5,3,4,5,6);
+	//printf("%d %d %d %d %d \n", (int)s.x, (int)s.y, (int)s.z, (int)s.age, (int)s.vel );
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitContextVersion(3, 2);

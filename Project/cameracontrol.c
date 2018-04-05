@@ -26,7 +26,7 @@ void initControls()
 
 void cameraRotation()
 {
-
+  
 	int distance_middle_x = x - (int)glutGet(GLUT_WINDOW_HEIGHT) / 2;
 	int distance_middle_y = y - (int)glutGet(GLUT_WINDOW_WIDTH) / 2;
 
@@ -46,7 +46,7 @@ void mouse(int x1,int y1)
 mat4 cameraPlacement()
 {
 
-	p = SetVector(5.0f,  5.0f, 10.0f);
+	p = SetVector(0.0f,  5.0f, 10.0f);
 	vec3 l = SetVector(0.0f, 5.0f, 0.0f);
 	vec3 v = SetVector(0.0f, 1.0f, 0.0f);
 	v = Normalize(v);
