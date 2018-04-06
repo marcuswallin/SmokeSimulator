@@ -34,9 +34,17 @@ void draw_room_model(Model *mod, mat4 mtw, mat4 cam, GLuint trans);
 void draw_billboard(Model *mod, mat4 mtw, mat4 cam);
 
 
-
 void init(void)
 {
+   init_smoke();
+	 convert_to_array();
+
+
+	 for (int i = 0; i< SMOKE_MAX_SIZE; ++i)
+	 {
+		 printf("%f\n", smoke_as_floats[i][0]);
+	 }
+
    glClearColor(0.2,0.2,0.5,0);
 	 glEnable(GL_DEPTH_TEST);
 	 glDisable(GL_CULL_FACE);
@@ -49,7 +57,8 @@ void init(void)
    lightToShader(program_room);
    glUseProgram(program_billboard);
 	 glUniformMatrix4fv(glGetUniformLocation(program_billboard, "projMatrix"), 1, GL_TRUE, projectionMatrix.m);
-   init_smoke_particles();
+   send_smoke_to_GPU();
+	// init_smoke_particles();
 	 //lightToShader(program_billboard);
 
 
@@ -111,13 +120,15 @@ void draw_room_model(Model *mod, mat4 mtw, mat4 cam, GLuint trans)
 
 void draw_billboard(Model *mod, mat4 mtw, mat4 cam)
 {
-  //mtw = Mult(mtw, T(0,trans,0));
-	mat4 cam1 = reset_rot_billboard(cam);
-  mat4 tot = Mult(cam1, mtw);
-	glUniformMatrix4fv(glGetUniformLocation(program_billboard, "camMatrix"), 1, GL_TRUE, cam1.m);
-  glUniformMatrix4fv(glGetUniformLocation(program_billboard, "mdlMatrix"), 1, GL_TRUE, tot.m);
+  mat4 new_mtw = T(0,0,0);
 
-  DrawModel(mod, program_billboard, "inPosition", NULL, "inTexCoord");
+//  mat4 tot = Mult(cam, new_mtw);
+
+	//tot = reset_rot_billboard(tot);
+	glUniformMatrix4fv(glGetUniformLocation(program_billboard, "camMatrix"), 1, GL_TRUE, cam.m);
+  glUniformMatrix4fv(glGetUniformLocation(program_billboard, "mtwMatrix"), 1, GL_TRUE, mtw.m);
+
+  DrawModelInstanced(mod, program_billboard, "inPosition", NULL, "inTexCoord");
 }
 
 
