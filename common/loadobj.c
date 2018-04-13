@@ -1208,7 +1208,9 @@ void DrawModel(Model *m, GLuint program, const char* vertexVariableName, const c
 	}
 }
 
-void DrawModelInstanced(Model *m, GLuint program, const char* vertexVariableName, const char* normalVariableName, const char* texCoordVariableName)
+
+
+void DrawModelInstanced(Model *m, GLuint program, char* vertexVariableName, char* normalVariableName, char* texCoordVariableName, int count)
 {
 	if (m != NULL)
 	{
@@ -1224,7 +1226,7 @@ void DrawModelInstanced(Model *m, GLuint program, const char* vertexVariableName
 			glEnableVertexAttribArray(loc);
 		}
 		else
-			ReportRerror("DrawModel", vertexVariableName);
+			fprintf(stderr, "DrawModel warning: '%s' not found in shader!\n", vertexVariableName);
 
 		if (normalVariableName!=NULL)
 		{
@@ -1236,7 +1238,7 @@ void DrawModelInstanced(Model *m, GLuint program, const char* vertexVariableName
 				glEnableVertexAttribArray(loc);
 			}
 			else
-				ReportRerror("DrawModel", normalVariableName);
+				fprintf(stderr, "DrawModel warning: '%s' not found in shader!\n", normalVariableName);
 		}
 
 		// VBO for texture coordinate data NEW for 5b
@@ -1250,11 +1252,11 @@ void DrawModelInstanced(Model *m, GLuint program, const char* vertexVariableName
 				glEnableVertexAttribArray(loc);
 			}
 			else
-				ReportRerror("DrawModel", texCoordVariableName);
+				fprintf(stderr, "DrawModel warning: '%s' not found in shader!\n", texCoordVariableName);
 		}
 
-  glDrawArraysInstanced(GL_TRIANGLES, 0, m->numIndices, 10);
-}
+		glDrawElementsInstanced(GL_TRIANGLES, m->numIndices, GL_UNSIGNED_INT, 0L, count);
+	}
 }
 
 
