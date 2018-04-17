@@ -53,8 +53,8 @@ void mouse(int x1,int y1)
 mat4 cameraPlacement()
 {
 
-  p = SetVector(0.0f,  5.0f, 10.0f);
-  vec3 l = SetVector(0.0f, 5.0f, 0.0f);
+  p = SetVector(0.0f,  -5.0f, 20.0f);
+  vec3 l = SetVector(0.0f, -5.0f, 0.0f);
   vec3 v = SetVector(0.0f, 1.0f, 0.0f);
   v = Normalize(v);
 

@@ -27,9 +27,9 @@ void main(void)
 
   mat4 tot = camMatrix * mtw_modified;
 
-  tot[0] = vec4(1.0, 0.0 , 0.0, 0.0);
-  tot[1] = vec4(0.0, 1.0 , 0.0, 0.0);
-  tot[2] = vec4(0.0, 0.0 , 1.0, 0.0);
+  tot[0] = vec4(texVal.w, 0.0 , 0.0, 0.0);
+  tot[1] = vec4(0.0, texVal.w , 0.0, 0.0);
+  tot[2] = vec4(0.0, 0.0 , texVal.w, 0.0);
 
 	gl_Position = projMatrix * tot *  vec4(inPosition, 1.0);
 
