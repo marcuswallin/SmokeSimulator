@@ -55,14 +55,14 @@ void init(void)
 	 glUniformMatrix4fv(glGetUniformLocation(program_billboard, "projMatrix"), 1, GL_TRUE, projectionMatrix.m);
    init_smoke();
 	// send_smoke_to_GPU();
-	 convert_to_array();
+	// convert_to_array();
 		// send_smoke_to_GPU(billboard_model);
 
- 	 for (int i = 0; i< 4*SMOKE_MAX_SIZE; ++i)
+ 	 /*for (int i = 0; i< 4*SMOKE_MAX_SIZE; ++i)
  	 {
  		 printf("%f\n", smoke_as_floats[i]);
  	 }
-
+*/
 	// init_smoke_particles();
 	 //lightToShader(program_billboard);
 
@@ -101,7 +101,8 @@ void display(void)
 
 	glUniform1i(glGetUniformLocation(program_billboard, "tex"), 3);
 
-		send_smoke_to_GPU();
+	smoke_interact_vector_field();
+	send_smoke_to_GPU();
 	draw_billboard(billboard_model, mtw_matrix, cam_matrix);
 
 	glUseProgram(program_room);
@@ -136,7 +137,7 @@ void draw_billboard(Model *mod, mat4 mtw, mat4 cam)
   glUniformMatrix4fv(glGetUniformLocation(program_billboard, "mtwMatrix"), 1, GL_TRUE, mtw.m);
 
 
-	DrawModelInstanced(mod, program_billboard, "inPosition", NULL, "inTexCoord", 10);
+	DrawModelInstanced(mod, program_billboard, "inPosition", NULL, "inTexCoord", nr_particles);
 }
 
 
