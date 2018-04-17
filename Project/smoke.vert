@@ -5,6 +5,7 @@ in vec2 inTexCoord;
 
 uniform sampler2D smokePos;
 
+out float age;
 out vec2 texCoord;
 
 uniform int nrParticles;
@@ -33,6 +34,7 @@ void main(void)
 
 	gl_Position = projMatrix * tot *  vec4(inPosition, 1.0);
 
+  age = texVal.w;
 	texCoord = inTexCoord;
 
 }

@@ -40,8 +40,8 @@ void init(void)
 	glClearColor(0.2,0.2,0.5,0);
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
-//	glEnable(GL_BLEND);
-//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//	glCullFace(GL_BACK);
 
 	initControls();
@@ -56,6 +56,7 @@ void init(void)
 	glUseProgram(program_billboard);
 	glUniformMatrix4fv(glGetUniformLocation(program_billboard, "projMatrix"), 1, GL_TRUE, projectionMatrix.m);
 	init_smoke();
+
 
 	//TEXTURES
 	glActiveTexture(GL_TEXTURE0);
@@ -85,14 +86,10 @@ void display(void)
 	cam_matrix = cameraPlacement();
 	mtw_matrix = IdentityMatrix();
 
-	//DRAW SMOKE---------------------------------------------
-	glUseProgram(program_billboard);
-	glUniform1i(glGetUniformLocation(program_billboard, "tex"), 3);
-	smoke_interact_vector_field(t);
-	send_smoke_to_GPU();
-	draw_billboard(billboard_model, mtw_matrix, cam_matrix);
+
 
 	//DRAW ROOM----------------------------------------------
+
 	glUseProgram(program_room);
 	glUniformMatrix4fv(glGetUniformLocation(program_room, "camMatrix"), 1, GL_TRUE, cam_matrix.m);
 	mtw_matrix = S(75,15,75);
@@ -105,8 +102,18 @@ void display(void)
 
 	//-------------------------------------------------------
 
-	if(t % 10 == 0)
-	add_particle( 5*cos(t*3.1415/(200) ),0, 5*sin(t*3.1415/(200)));
+	//DRAW SMOKE---------------------------------------------
+	glDisable(GL_DEPTH_TEST);
+	glUseProgram(program_billboard);
+	glUniform1i(glGetUniformLocation(program_billboard, "tex"), 3);
+	//smoke_interact_vector_field(t);
+	send_smoke_to_GPU();
+	draw_billboard(billboard_model, mtw_matrix, cam_matrix);
+  glEnable(GL_DEPTH_TEST);
+
+  if(t % 100 == 0 && t > 300)
+  {	//add_particle( 5*cos(t*3.1415/(2000) ),0, 5*sin(t*3.1415/2000));
+	}
 
 	t++;
 	//printf("%i\n", t);

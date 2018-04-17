@@ -22,19 +22,29 @@ GLuint program_billboard;
 smoke *smoke_array;
 void add_particle(GLfloat x, GLfloat y, GLfloat z);
 void remove_particle(int index);
+
+int partition( smoke a[], int l, int r);
+void quick_sort( smoke a[], int l, int r);
 GLuint smoke_pos_texdata;
 
 //initialises a number of smoke particles.
 void init_smoke(void)
 {
   glUseProgram(program_billboard);
-  int nr = 0;
+  int nr = 20;
   smoke_array = malloc (MAX_PARTICLES * sizeof (smoke));
 
   for(int i = 0; i < nr; ++i)
   {
-    add_particle(i-3,-5, 0);
+    add_particle( 5*cos(i*3.1415/(10) ),0, 5*sin(i*3.1415/10));
+
   }
+     printf("\n \n");
+
+  quick_sort(smoke_array, 0, nr);
+  for (int i = 0; i < nr ; ++i)
+  printf("%f\n", smoke_array[i].z);
+
   glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles);
 
   //init texture data
@@ -112,4 +122,40 @@ void remove_particle(int index)
   }
 
   --nr_particles;
+}
+
+int partition( smoke a[], int l, int r);
+
+//does not work!
+void quick_sort( smoke a[], int l, int r)
+{
+   int j;
+
+   if( l < r )
+   {
+   	// divide and conquer
+        j = partition( a, l, r);
+       quick_sort( a, l, j-1);
+       quick_sort( a, j+1, r);
+   }
+
+}
+
+
+
+int partition( smoke a[], int l, int r) {
+   int pivot, i, j;
+   smoke t;
+   pivot = a[l].z;
+   i = l; j = r+1;
+
+   while( 1)
+   {
+   	do ++i; while( a[i].z <= pivot && i <= r );
+   	do --j; while( a[j].z > pivot );
+   	if( i >= j ) break;
+   	t = a[i]; a[i] = a[j]; a[j] = t;
+   }
+   t = a[l]; a[l] = a[j]; a[j] = t;
+   return j;
 }
