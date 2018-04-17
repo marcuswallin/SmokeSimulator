@@ -21,10 +21,12 @@ typedef struct smoke
 GLuint program_billboard;
 smoke *smoke_array;
 void add_smoke(GLfloat x, GLfloat y, GLfloat z, GLfloat age);
+GLuint smoke_pos_texdata;
 
 //initialises a number of smoke particles.
 void init_smoke(void)
 {
+   glUseProgram(program_billboard);
    int nr = 20;
    smoke_array = malloc (MAX_PARTICLES * sizeof (smoke));
 
@@ -33,31 +35,39 @@ void init_smoke(void)
       add_smoke(5 + 10*sin(3.1415 * i / nr), i, 0,0);
 
    }
+   glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles);
 
+   //init texture data
+   glActiveTexture(GL_TEXTURE4);
+   glGenTextures(1, &smoke_pos_texdata);
+   glBindTexture(GL_TEXTURE_2D, smoke_pos_texdata);
+
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F,  nr_particles,1, 0,
+       GL_RGBA, GL_FLOAT, &smoke_array[0].x);
+   glUniform1i(glGetUniformLocation(program_billboard, "smokePos"), 4);
 }
+
+//sends the smoke array to the GPU
 void send_smoke_to_GPU(void)
 {
-
-  glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles);
-  GLuint texID;
-  //change this
+  glUseProgram(program_billboard);
   glActiveTexture(GL_TEXTURE4);
-	glGenTextures(1, &texID);
-  glBindTexture(GL_TEXTURE_2D, texID);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
+  glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F,  nr_particles,1, 0,
       GL_RGBA, GL_FLOAT, &smoke_array[0].x);
-
   glUniform1i(glGetUniformLocation(program_billboard, "smokePos"), 4);
 
 }
 
-//change this to insert the smnoke in the array.
+//Adds a smoke particle at the end of the smoke array.
+//If the smoke_array is already full, then this will not do anything.
 void add_smoke(GLfloat x, GLfloat y, GLfloat z, GLfloat age)
 {
+   if(nr_particles >= MAX_PARTICLES)
+      return;
 
 	 smoke_array[nr_particles].x = x;
 	 smoke_array[nr_particles].y = y;
@@ -65,25 +75,37 @@ void add_smoke(GLfloat x, GLfloat y, GLfloat z, GLfloat age)
    smoke_array[nr_particles].age = age;
 
    ++nr_particles;
-
 }
 
-int ti = 0;
-void smoke_interact_vector_field(void)
+//int ti = 0;
+
+//Iterates over every smoke element and
+//applies a movement function on every particle.
+void smoke_interact_vector_field(int t)
 {
-   ++ti;
+
    for (int i = 0; i < nr_particles ; ++i)
    {
-      smoke t = smoke_array[i];
-      float d =  sqrt(t.x*t.x + t.z*t.z) ;
-    //  float angle = acos(t.x /d);
+      smoke tmp = smoke_array[i];
+      float d =  sqrt(tmp.x*tmp.x + tmp.z*tmp.z) ;
 
-    //  float new_angle = angle + 0.01;
-  //    printf("%f\n", new_angle);
-
-      float new_angle = ti * 0.01;
+      float new_angle = t * 0.01;
       smoke_array[i].x = d*cos(new_angle );
       smoke_array[i].z = d*sin(new_angle );
 
    }
+}
+
+void remove_particle(int index)
+{
+  if (index >= nr_particles || index < 0)
+    return;
+
+  for(int i = index; i < nr_particles - 1; ++i)
+  {
+    smoke_array[i] = smoke_array[i + 1];
+  }
+
+  --nr_particles;
+
 }

@@ -46,27 +46,14 @@ void init(void)
    program_room = loadShaders("wall.vert", "wall.frag");
 	 program_billboard = loadShaders("smoke.vert", "smoke.frag");
 
-
    lightToShader(program_room);
 
-
-//SMOKE
+   //SMOKE
    glUseProgram(program_billboard);
 	 glUniformMatrix4fv(glGetUniformLocation(program_billboard, "projMatrix"), 1, GL_TRUE, projectionMatrix.m);
    init_smoke();
-	// send_smoke_to_GPU();
-	// convert_to_array();
-		// send_smoke_to_GPU(billboard_model);
 
- 	 /*for (int i = 0; i< 4*SMOKE_MAX_SIZE; ++i)
- 	 {
- 		 printf("%f\n", smoke_as_floats[i]);
- 	 }
-*/
-	// init_smoke_particles();
-	 //lightToShader(program_billboard);
-
-
+	 //TEXTURES
 	 glActiveTexture(GL_TEXTURE0);
    LoadTGATexture("objects/wallpaper_3.tga", &wall_tex);
    glActiveTexture(GL_TEXTURE1);
@@ -76,9 +63,6 @@ void init(void)
 	 glActiveTexture(GL_TEXTURE3);
    LoadTGATexture("objects/maskros512.tga", &smoke_tex);
 
-	 send_smoke_to_GPU();
-
-
 	 room_model = LoadModelPlus("objects/cube_tc.obj");
 	 floor_model = LoadModelPlus("objects/floor.obj");
    roof_model = LoadModelPlus("objects/roof.obj");
@@ -86,25 +70,25 @@ void init(void)
 
 }
 
+
+int t = 0;
+
 void display(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	mat4 mtw_matrix, cam_matrix;
-  //DRAW ROOM----------------------------------------------
-//  glUseProgram(program_room);
 	cam_matrix = cameraPlacement();
-
 	mtw_matrix = IdentityMatrix();
 
+	//DRAW SMOKE---------------------------------------------
 	glUseProgram(program_billboard);
-
 	glUniform1i(glGetUniformLocation(program_billboard, "tex"), 3);
-
-	smoke_interact_vector_field();
+	smoke_interact_vector_field(t);
 	send_smoke_to_GPU();
 	draw_billboard(billboard_model, mtw_matrix, cam_matrix);
 
+  //DRAW ROOM----------------------------------------------
 	glUseProgram(program_room);
 	glUniformMatrix4fv(glGetUniformLocation(program_room, "camMatrix"), 1, GL_TRUE, cam_matrix.m);
 	mtw_matrix = S(30,15,30);
@@ -117,7 +101,11 @@ void display(void)
 
   //-------------------------------------------------------
 
-  glutSwapBuffers();
+	t++;
+	if(t % 100 == 0)
+	   remove_particle((int)t/100);
+  //printf("%i\n", t);
+	glutSwapBuffers();
 }
 
 void draw_room_model(Model *mod, mat4 mtw, mat4 cam, GLuint trans)
@@ -135,8 +123,6 @@ void draw_billboard(Model *mod, mat4 mtw, mat4 cam)
 
 	glUniformMatrix4fv(glGetUniformLocation(program_billboard, "camMatrix"), 1, GL_TRUE, cam.m);
   glUniformMatrix4fv(glGetUniformLocation(program_billboard, "mtwMatrix"), 1, GL_TRUE, mtw.m);
-
-
 	DrawModelInstanced(mod, program_billboard, "inPosition", NULL, "inTexCoord", nr_particles);
 }
 
