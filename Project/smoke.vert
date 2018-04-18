@@ -19,7 +19,7 @@ void main(void)
   mat4 mtw_modified = mtwMatrix;
 
   float instance = float(gl_InstanceID);
-  float v = instance  / nrParticles + 1.0/1000000;
+  float v = (instance) / nrParticles + 1.0/1000000;
   vec4 texVal  = texture(smokePos, vec2(v, 0));
 
 	mtw_modified[3][0] = mtwMatrix[3][0] + texVal.x;

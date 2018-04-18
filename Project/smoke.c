@@ -15,7 +15,10 @@ int nr_particles = 0;
 
 typedef struct smoke
 {
-  float x, y, z, age;
+  vec3 world_pos;
+  GLfloat age;
+//  vec3 view_pos;
+//  GLfloat rot;
 } smoke;
 
 GLuint program_billboard;
@@ -25,6 +28,7 @@ void remove_particle(int index);
 
 int partition( smoke a[], int l, int r);
 void quick_sort( smoke a[], int l, int r);
+//GLfloat* convert_to_array(void);
 GLuint smoke_pos_texdata;
 
 //initialises a number of smoke particles.
@@ -41,9 +45,9 @@ void init_smoke(void)
   }
      printf("\n \n");
 
-  quick_sort(smoke_array, 0, nr);
+  //quick_sort(smoke_array, 0, nr);
   for (int i = 0; i < nr ; ++i)
-  printf("%f\n", smoke_array[i].z);
+     printf("%f\n", smoke_array[i].world_pos.z);
 
   glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles);
 
@@ -55,20 +59,44 @@ void init_smoke(void)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F,  nr_particles,1, 0,
-    GL_RGBA, GL_FLOAT, &smoke_array[0].x);
-    glUniform1i(glGetUniformLocation(program_billboard, "smokePos"), 4);
-}
+//  GLfloat* a = convert_to_array();
 
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F,  nr_particles,1, 0,
+    GL_RGBA, GL_FLOAT, &smoke_array[0].world_pos.x);
+  glUniform1i(glGetUniformLocation(program_billboard, "smokePos"), 4);
+}
+/*
+GLfloat* convert_to_array(void)
+{
+   static GLfloat tmp[MAX_PARTICLES*8];
+
+   for(int i = 0; i < nr_particles; ++i)
+   {
+     smoke t = smoke_array[i];
+     tmp[i*4] = t.world_pos.x;
+     tmp[i*4+1] = t.world_pos.y;
+     tmp[i*4+2] = t.world_pos.z;
+     tmp[i*4+3] = t.age;
+     //currently I dno't need both world_pos and view_pos.
+//     tmp[i*8+4] = t.view_pos.x;
+//     tmp[i*8+5] = t.view_pos.y;
+//     tmp[i*8+6] = t.view_pos.z;
+//     tmp[i*8+7] = t.rot;
+   }
+
+   return tmp;
+}
+*/
   //sends the smoke array to the GPU
 void send_smoke_to_GPU(void)
 {
 glUseProgram(program_billboard);
 glActiveTexture(GL_TEXTURE4);
 glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles);
+//  GLfloat* a = convert_to_array();
 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F,  nr_particles,1, 0,
-  GL_RGBA, GL_FLOAT, &smoke_array[0].x);
-  glUniform1i(glGetUniformLocation(program_billboard, "smokePos"), 4);
+  GL_RGBA, GL_FLOAT, &smoke_array[0].world_pos.x);
+glUniform1i(glGetUniformLocation(program_billboard, "smokePos"), 4);
 
 }
 
@@ -77,12 +105,15 @@ glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F,  nr_particles,1, 0,
 void add_particle(GLfloat x, GLfloat y, GLfloat z)
 {
   if(nr_particles >= MAX_PARTICLES)
-  return;
+    return;
 
-  smoke_array[nr_particles].x = x;
-  smoke_array[nr_particles].y = y;
-  smoke_array[nr_particles].z = z;
+  vec3 pos = SetVector(x,y,z);
+  smoke_array[nr_particles].world_pos = pos;
   smoke_array[nr_particles].age = 1;
+//  vec3 view_pos = SetVector(x+10,y,z);
+//  smoke_array[nr_particles].view_pos = view_pos;
+//  smoke_array[nr_particles].view_pos.x += 10;
+  //smoke_array[nr_particles].rot = 0;
 
   ++nr_particles;
 }
@@ -101,9 +132,10 @@ void smoke_interact_vector_field(int t)
         remove_particle(i);
 
     smoke tmp = smoke_array[i];
-    smoke_array[i].x += tmp.x *tmp.y / 5000;
-    smoke_array[i].y += (GLfloat)(tmp.y + FLOOR_Y_POS) / (50*FLOOR_Y_POS) ;
-    smoke_array[i].z += tmp.z*tmp.y / 5000;
+    smoke_array[i].world_pos.x += tmp.world_pos.x *tmp.world_pos.y / 5000;
+    smoke_array[i].world_pos.y += (GLfloat)(tmp.world_pos.y +
+      FLOOR_Y_POS) / (50*FLOOR_Y_POS) ;
+    smoke_array[i].world_pos.z += tmp.world_pos.z*tmp.world_pos.y / 5000;
     smoke_array[i].age += (GLfloat) 1/GROWTH_FACTOR;
 
   }
@@ -126,7 +158,8 @@ void remove_particle(int index)
 
 int partition( smoke a[], int l, int r);
 
-//does not work!
+
+//sorts the smoke array according to siew-plane coordinates!
 void quick_sort( smoke a[], int l, int r)
 {
    int j;
@@ -144,15 +177,15 @@ void quick_sort( smoke a[], int l, int r)
 
 
 int partition( smoke a[], int l, int r) {
-   int pivot, i, j;
+   int i, j;
    smoke t;
-   pivot = a[l].z;
+   GLfloat pivot = a[l].world_pos.z;
    i = l; j = r+1;
 
    while( 1)
    {
-   	do ++i; while( a[i].z <= pivot && i <= r );
-   	do --j; while( a[j].z > pivot );
+   	do ++i; while( a[i].world_pos.z <= pivot && i <= r );
+   	do --j; while( a[j].world_pos.z > pivot );
    	if( i >= j ) break;
    	t = a[i]; a[i] = a[j]; a[j] = t;
    }
