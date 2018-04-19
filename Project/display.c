@@ -55,7 +55,7 @@ void init(void)
 	//SMOKE
 	glUseProgram(program_billboard);
 	glUniformMatrix4fv(glGetUniformLocation(program_billboard, "projMatrix"), 1, GL_TRUE, projectionMatrix.m);
-	init_smoke();
+	init_smoke(cameraPlacement());
 
 
 	//TEXTURES

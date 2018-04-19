@@ -15,7 +15,7 @@ int nr_particles = 0;
 
 typedef struct smoke
 {
-  vec3 world_pos;
+  vec3 view_pos;
   GLfloat age;
 //  vec3 view_pos;
 //  GLfloat rot;
@@ -23,7 +23,7 @@ typedef struct smoke
 
 GLuint program_billboard;
 smoke *smoke_array;
-void add_particle(GLfloat x, GLfloat y, GLfloat z);
+void add_particle(GLfloat x, GLfloat y, GLfloat z, mat4 cam_matrix);
 void remove_particle(int index);
 
 int partition( smoke a[], int l, int r);
@@ -32,7 +32,7 @@ void quick_sort( smoke a[], int l, int r);
 GLuint smoke_pos_texdata;
 
 //initialises a number of smoke particles.
-void init_smoke(void)
+void init_smoke(mat4 cam_matrix)
 {
   glUseProgram(program_billboard);
   int nr = 20;
@@ -40,14 +40,13 @@ void init_smoke(void)
 
   for(int i = 0; i < nr; ++i)
   {
-    add_particle( 5*cos(i*3.1415/(10) ),0, 5*sin(i*3.1415/10));
-
+    add_particle( 5*cos(i*3.1415/(10) ),0, 5*sin(i*3.1415/10), cam_matrix);
   }
      printf("\n \n");
 
   quick_sort(smoke_array, 0, nr);
   for (int i = 0; i < nr ; ++i)
-     printf("%f\n", smoke_array[i].world_pos.z);
+     printf("%f\n", smoke_array[i].view_pos.z);
 
   glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles);
 
@@ -62,7 +61,7 @@ void init_smoke(void)
 //  GLfloat* a = convert_to_array();
 
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F,  nr_particles,1, 0,
-    GL_RGBA, GL_FLOAT, &smoke_array[0].world_pos.x);
+    GL_RGBA, GL_FLOAT, &smoke_array[0].view_pos.x);
   glUniform1i(glGetUniformLocation(program_billboard, "smokePos"), 4);
 }
 /*
@@ -73,11 +72,11 @@ GLfloat* convert_to_array(void)
    for(int i = 0; i < nr_particles; ++i)
    {
      smoke t = smoke_array[i];
-     tmp[i*4] = t.world_pos.x;
-     tmp[i*4+1] = t.world_pos.y;
-     tmp[i*4+2] = t.world_pos.z;
+     tmp[i*4] = t.view_pos.x;
+     tmp[i*4+1] = t.view_pos.y;
+     tmp[i*4+2] = t.view_pos.z;
      tmp[i*4+3] = t.age;
-     //currently I dno't need both world_pos and view_pos.
+     //currently I dno't need both view_pos and view_pos.
 //     tmp[i*8+4] = t.view_pos.x;
 //     tmp[i*8+5] = t.view_pos.y;
 //     tmp[i*8+6] = t.view_pos.z;
@@ -87,28 +86,33 @@ GLfloat* convert_to_array(void)
    return tmp;
 }
 */
-  //sends the smoke array to the GPU
-void send_smoke_to_GPU(void)
+//sends the smoke array to the GPU
+void send_smoke_to_GPU(mat4 cam_matrix)
 {
-glUseProgram(program_billboard);
-glActiveTexture(GL_TEXTURE4);
-glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles);
-//  GLfloat* a = convert_to_array();
-glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F,  nr_particles,1, 0,
-  GL_RGBA, GL_FLOAT, &smoke_array[0].world_pos.x);
-glUniform1i(glGetUniformLocation(program_billboard, "smokePos"), 4);
+  glUseProgram(program_billboard);
+  glActiveTexture(GL_TEXTURE4);
+  glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles);
+  //  GLfloat* a = convert_to_array();
+  for()
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F,  nr_particles,1, 0,
+    GL_RGBA, GL_FLOAT, &smoke_array[0].view_pos.x);
+
+  glUniform1i(glGetUniformLocation(program_billboard, "smokePos"), 4);
 
 }
 
+
+
 //Adds a smoke particle at the end of the smoke array.
 //If the smoke_array is already full, then this will not do anything.
-void add_particle(GLfloat x, GLfloat y, GLfloat z)
+void add_particle(GLfloat x, GLfloat y, GLfloat z, mat4 cam_matrix)
 {
   if(nr_particles >= MAX_PARTICLES)
     return;
 
   vec3 pos = SetVector(x,y,z);
-  smoke_array[nr_particles].world_pos = pos;
+
+  smoke_array[nr_particles].view_pos = MultVec3(cam_matrix,pos);
   smoke_array[nr_particles].age = 1;
 //  vec3 view_pos = SetVector(x+10,y,z);
 //  smoke_array[nr_particles].view_pos = view_pos;
@@ -132,10 +136,10 @@ void smoke_interact_vector_field(int t)
         remove_particle(i);
 
     smoke tmp = smoke_array[i];
-    smoke_array[i].world_pos.x += tmp.world_pos.x *tmp.world_pos.y / 5000;
-    smoke_array[i].world_pos.y += (GLfloat)(tmp.world_pos.y +
+    smoke_array[i].view_pos.x += tmp.view_pos.x *tmp.view_pos.y / 5000;
+    smoke_array[i].view_pos.y += (GLfloat)(tmp.view_pos.y +
       FLOOR_Y_POS) / (50*FLOOR_Y_POS) ;
-    smoke_array[i].world_pos.z += tmp.world_pos.z*tmp.world_pos.y / 5000;
+    smoke_array[i].view_pos.z += tmp.view_pos.z*tmp.view_pos.y / 5000;
     smoke_array[i].age += (GLfloat) 1/GROWTH_FACTOR;
 
   }
@@ -179,13 +183,13 @@ void quick_sort( smoke a[], int l, int r)
 int partition( smoke a[], int l, int r) {
    int i, j;
    smoke t;
-   GLfloat pivot = a[l].world_pos.z;
+   GLfloat pivot = a[l].view_pos.z;
    i = l; j = r+1;
 
    while( 1)
    {
-   	do ++i; while( a[i].world_pos.z <= pivot && i <= r );
-   	do --j; while( a[j].world_pos.z > pivot );
+   	do ++i; while( a[i].view_pos.z <= pivot && i <= r );
+   	do --j; while( a[j].view_pos.z > pivot );
    	if( i >= j ) break;
    	t = a[i]; a[i] = a[j]; a[j] = t;
    }

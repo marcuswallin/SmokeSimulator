@@ -23,7 +23,7 @@ void main(void)
   vec4 texVal  = texture(smokePos, vec2(v, 0));
 
 	mtw_modified[3][0] = mtwMatrix[3][0] + texVal.x;
-	mtw_modified[3][1] = mtwMatrix[3][1] -12 + texVal.y ;
+	mtw_modified[3][1] = mtwMatrix[3][1] + texVal.y ;
 	mtw_modified[3][2] = mtwMatrix[3][2] + texVal.z;
 
   mat4 tot = camMatrix * mtw_modified;
@@ -31,6 +31,7 @@ void main(void)
   tot[0] = vec4(texVal.w, 0.0 , 0.0, 0.0);
   tot[1] = vec4(0.0, texVal.w , 0.0, 0.0);
   tot[2] = vec4(0.0, 0.0 , texVal.w, 0.0);
+
 
 	gl_Position = projMatrix * tot *  vec4(inPosition, 1.0);
 
