@@ -45,7 +45,7 @@ void init_smoke(void)
   }
      printf("\n \n");
 
-  //quick_sort(smoke_array, 0, nr);
+  quick_sort(smoke_array, 0, nr);
   for (int i = 0; i < nr ; ++i)
      printf("%f\n", smoke_array[i].world_pos.z);
 
