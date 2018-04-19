@@ -41,29 +41,20 @@ void init_smoke(void)
   for(int i = 0; i < nr; ++i)
   {
     add_particle( 5*cos(i*3.1415/(nr/2) ),0, 5*sin(i*3.1415/(nr/2)));
-  //   add_particle( -5 + i,0, -15);
   }
 
-  printf("\n %i \n", nr_particles);
   if(nr_particles > 0)
     quick_sort(smoke_array, 0, nr_particles - 1, SetVector(1,0,0));
 
-  for (int i = 0; i < nr_particles ; ++i)
-  {   //printf("%f %f %f \n", smoke_array[i].world_pos.x,
-      //   smoke_array[i].world_pos.y, smoke_array[i].world_pos.z);
-  }
-
   glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles);
 
-  //init texture data
+  //init texture data--------------------------------------------------
   glActiveTexture(GL_TEXTURE4);
   glGenTextures(1, &smoke_pos_texdata);
   glBindTexture(GL_TEXTURE_2D, smoke_pos_texdata);
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-//  GLfloat* a = convert_to_array();
 
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F,  nr_particles,1, 0,
     GL_RGBA, GL_FLOAT, &smoke_array[0].world_pos.x);
@@ -94,10 +85,6 @@ void add_particle(GLfloat x, GLfloat y, GLfloat z)
   vec3 pos = SetVector(x,y,z);
   smoke_array[nr_particles].world_pos = pos;
   smoke_array[nr_particles].age = 1;
-//  vec3 view_pos = SetVector(x+10,y,z);
-//  smoke_array[nr_particles].view_pos = view_pos;
-//  smoke_array[nr_particles].view_pos.x += 10;
-  //smoke_array[nr_particles].rot = 0;
 
   ++nr_particles;
   printf("%i\n", nr_particles);

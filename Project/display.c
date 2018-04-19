@@ -110,7 +110,7 @@ void display(void)
 	draw_billboard(billboard_model, mtw_matrix, cam_matrix);
   glEnable(GL_DEPTH_TEST);
 
-  if(t % 10 == 0 && t > 50)
+  if(t % 5 == 0 && t > 50)
   {
 		add_particle( 5*cos(t*3.1415/(200) ),-7, 5*sin(t*3.1415/200));
 
