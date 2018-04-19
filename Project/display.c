@@ -45,6 +45,7 @@ void init(void)
 	//	glCullFace(GL_BACK);
 
 	initControls();
+	cameraPlacement();
 
 	projectionMatrix = frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 200.0);
 	program_room = loadShaders("wall.vert", "wall.frag");
@@ -86,8 +87,6 @@ void display(void)
 	cam_matrix = cameraPlacement();
 	mtw_matrix = IdentityMatrix();
 
-
-
 	//DRAW ROOM----------------------------------------------
 
 	glUseProgram(program_room);
@@ -106,8 +105,8 @@ void display(void)
 	glDisable(GL_DEPTH_TEST);
 	glUseProgram(program_billboard);
 	glUniform1i(glGetUniformLocation(program_billboard, "tex"), 3);
-	//smoke_interact_vector_field(t);
-	send_smoke_to_GPU();
+	smoke_interact_vector_field(t);
+	send_smoke_to_GPU(VectorSub(SetVector(0,0,0), get_look_dir()));
 	draw_billboard(billboard_model, mtw_matrix, cam_matrix);
   glEnable(GL_DEPTH_TEST);
 

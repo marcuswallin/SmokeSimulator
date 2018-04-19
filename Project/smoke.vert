@@ -19,11 +19,12 @@ void main(void)
   mat4 mtw_modified = mtwMatrix;
 
   float instance = float(gl_InstanceID);
-  float v = (instance) / nrParticles + 1.0/1000000;
+  float nr = float(nrParticles);
+  float v = (instance ) / nr + 1.0/1000000;
   vec4 texVal  = texture(smokePos, vec2(v, 0));
 
 	mtw_modified[3][0] = mtwMatrix[3][0] + texVal.x;
-	mtw_modified[3][1] = mtwMatrix[3][1] -12 + texVal.y ;
+	mtw_modified[3][1] = mtwMatrix[3][1] + texVal.y;
 	mtw_modified[3][2] = mtwMatrix[3][2] + texVal.z;
 
   mat4 tot = camMatrix * mtw_modified;

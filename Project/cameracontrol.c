@@ -10,17 +10,19 @@
 #include "VectorUtils3.h"
 
 
-vec3 p;
+vec3 p,l;
 GLfloat old_theta = 0.0f;
 GLfloat delta_theta = 0.0f;
 GLfloat old_phi = 0.0f;
 GLfloat delta_phi = 0.0f;
 int x = 0;
 int y = 0;
-mat4 trans;
+mat4 trans, rot;
 
 void initControls()
 {
+  p = SetVector(0.0f,  -5.0f, 20.0f);
+  l = SetVector(0.0f, -5.0f, 0.0f);
   trans = IdentityMatrix();
   glutHideCursor();
 }
@@ -54,7 +56,7 @@ mat4 cameraPlacement()
 {
 
   p = SetVector(0.0f,  -5.0f, 20.0f);
-  vec3 l = SetVector(0.0f, -5.0f, 0.0f);
+  l = SetVector(0.0f, -5.0f, 0.0f);
   vec3 v = SetVector(0.0f, 1.0f, 0.0f);
   v = Normalize(v);
 
@@ -82,10 +84,21 @@ mat4 cameraPlacement()
   trans = old_trans;
   */
 
-  mat4 rot = Mult(Ry(old_theta), Rx(old_phi));
+  rot = Mult(Ry(old_theta), Rx(old_phi));
 
   return  lookAtv(MultVec3(trans, p),
   MultVec3(Mult(trans, Mult( T(p.x, p.y, p.z),
   Mult(rot, T(-p.x, -p.y, -p.z)))), l) ,
   v);
+}
+
+
+
+vec3 get_look_dir(void)
+{
+  vec3 tmp_l = MultVec3(Mult(trans, Mult( T(p.x, p.y, p.z),
+                                          Mult(rot, T(-p.x, -p.y, -p.z)))), l);
+  vec3 tmp_p = MultVec3(trans, p);
+  vec3 look_dir = Normalize(VectorSub(tmp_l,tmp_p));
+  return look_dir;
 }

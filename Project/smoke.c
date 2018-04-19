@@ -26,8 +26,8 @@ smoke *smoke_array;
 void add_particle(GLfloat x, GLfloat y, GLfloat z);
 void remove_particle(int index);
 
-int partition( smoke a[], int l, int r);
-void quick_sort( smoke a[], int l, int r);
+int partition( smoke a[], int l, int r, vec3 look_vec);
+void quick_sort( smoke a[], int l, int r, vec3 look_vec);
 //GLfloat* convert_to_array(void);
 GLuint smoke_pos_texdata;
 
@@ -43,11 +43,15 @@ void init_smoke(void)
     add_particle( 5*cos(i*3.1415/(10) ),0, 5*sin(i*3.1415/10));
 
   }
-     printf("\n \n");
 
-  quick_sort(smoke_array, 0, nr);
+  printf("\n %i \n", nr_particles);
+
+  quick_sort(smoke_array, 0, nr, SetVector(0,0,1));
+
   for (int i = 0; i < nr ; ++i)
-     printf("%f\n", smoke_array[i].world_pos.z);
+  {   printf("%f %f %f \n", smoke_array[i].world_pos.x,
+         smoke_array[i].world_pos.y, smoke_array[i].world_pos.z);
+  }
 
   glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles);
 
@@ -65,40 +69,20 @@ void init_smoke(void)
     GL_RGBA, GL_FLOAT, &smoke_array[0].world_pos.x);
   glUniform1i(glGetUniformLocation(program_billboard, "smokePos"), 4);
 }
-/*
-GLfloat* convert_to_array(void)
-{
-   static GLfloat tmp[MAX_PARTICLES*8];
 
-   for(int i = 0; i < nr_particles; ++i)
-   {
-     smoke t = smoke_array[i];
-     tmp[i*4] = t.world_pos.x;
-     tmp[i*4+1] = t.world_pos.y;
-     tmp[i*4+2] = t.world_pos.z;
-     tmp[i*4+3] = t.age;
-     //currently I dno't need both world_pos and view_pos.
-//     tmp[i*8+4] = t.view_pos.x;
-//     tmp[i*8+5] = t.view_pos.y;
-//     tmp[i*8+6] = t.view_pos.z;
-//     tmp[i*8+7] = t.rot;
-   }
 
-   return tmp;
-}
-*/
   //sends the smoke array to the GPU
-void send_smoke_to_GPU(void)
-{
-glUseProgram(program_billboard);
-glActiveTexture(GL_TEXTURE4);
-glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles);
-//  GLfloat* a = convert_to_array();
-glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F,  nr_particles,1, 0,
-  GL_RGBA, GL_FLOAT, &smoke_array[0].world_pos.x);
-glUniform1i(glGetUniformLocation(program_billboard, "smokePos"), 4);
+  void send_smoke_to_GPU(vec3 look_dir)
+  {
+    glUseProgram(program_billboard);
+    glActiveTexture(GL_TEXTURE4);
+    glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles);
+    quick_sort(smoke_array, 0, nr_particles, look_dir);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F,  nr_particles,1, 0,
+      GL_RGBA, GL_FLOAT, &smoke_array[0].world_pos.x);
+    glUniform1i(glGetUniformLocation(program_billboard, "smokePos"), 4);
 
-}
+  }
 
 //Adds a smoke particle at the end of the smoke array.
 //If the smoke_array is already full, then this will not do anything.
@@ -156,36 +140,36 @@ void remove_particle(int index)
   --nr_particles;
 }
 
-int partition( smoke a[], int l, int r);
 
 
 //sorts the smoke array according to siew-plane coordinates!
-void quick_sort( smoke a[], int l, int r)
+//look dir should be the direction we want to sort in. Can be minus
+void quick_sort( smoke a[], int l, int r, vec3 look_dir)
 {
    int j;
 
    if( l < r )
    {
    	// divide and conquer
-        j = partition( a, l, r);
-       quick_sort( a, l, j-1);
-       quick_sort( a, j+1, r);
+        j = partition( a, l, r, look_dir);
+       quick_sort( a, l, j-1, look_dir);
+       quick_sort( a, j+1, r, look_dir);
    }
 
 }
 
 
 
-int partition( smoke a[], int l, int r) {
+int partition( smoke a[], int l, int r, vec3 look_dir) {
    int i, j;
    smoke t;
-   GLfloat pivot = a[l].world_pos.z;
+   GLfloat pivot = DotProduct(a[l].world_pos, look_dir);
    i = l; j = r+1;
 
    while( 1)
    {
-   	do ++i; while( a[i].world_pos.z <= pivot && i <= r );
-   	do --j; while( a[j].world_pos.z > pivot );
+   	do ++i; while( DotProduct(a[i].world_pos, look_dir) <= pivot && i <= r );
+   	do --j; while( DotProduct(a[j].world_pos, look_dir) > pivot );
    	if( i >= j ) break;
    	t = a[i]; a[i] = a[j]; a[j] = t;
    }
