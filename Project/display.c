@@ -88,7 +88,7 @@ void display(void)
 	//DRAW SMOKE---------------------------------------------
 	glUseProgram(program_billboard);
 	glUniform1i(glGetUniformLocation(program_billboard, "tex"), 3);
-	smoke_interact_vector_field(t);
+	//smoke_interact_vector_field(t);
 	send_smoke_to_GPU();
 	draw_billboard(billboard_model, mtw_matrix, cam_matrix);
 
@@ -106,7 +106,7 @@ void display(void)
 	//-------------------------------------------------------
 
 	if(t % 10 == 0)
-	add_particle( 5*cos(t*3.1415/(200) ),0, 5*sin(t*3.1415/(200)));
+	//add_particle( 5*cos(t*3.1415/(200) ),0, 5*sin(t*3.1415/(200)));
 
 	t++;
 	//printf("%i\n", t);

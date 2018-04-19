@@ -28,7 +28,7 @@ GLuint smoke_pos_texdata;
 void init_smoke(void)
 {
   glUseProgram(program_billboard);
-  int nr = 0;
+  int nr = 20;
   smoke_array = malloc (MAX_PARTICLES * sizeof (smoke));
 
   for(int i = 0; i < nr; ++i)
