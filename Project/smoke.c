@@ -10,7 +10,7 @@
 #include "VectorUtils3.h"
 #include "loadobj.h"
 
-#define MAX_PARTICLES 2000
+#define MAX_PARTICLES 5000
 int nr_particles = 0;
 
 typedef struct smoke
@@ -35,22 +35,22 @@ GLuint smoke_pos_texdata;
 void init_smoke(void)
 {
   glUseProgram(program_billboard);
-  int nr = 20;
+  int nr =0;
   smoke_array = malloc (MAX_PARTICLES * sizeof (smoke));
 
   for(int i = 0; i < nr; ++i)
   {
-    add_particle( 5*cos(i*3.1415/(10) ),0, 5*sin(i*3.1415/10));
-
+    add_particle( 5*cos(i*3.1415/(nr/2) ),0, 5*sin(i*3.1415/(nr/2)));
+  //   add_particle( -5 + i,0, -15);
   }
 
   printf("\n %i \n", nr_particles);
+  if(nr_particles > 0)
+    quick_sort(smoke_array, 0, nr_particles - 1, SetVector(1,0,0));
 
-  quick_sort(smoke_array, 0, nr, SetVector(0,0,1));
-
-  for (int i = 0; i < nr ; ++i)
-  {   printf("%f %f %f \n", smoke_array[i].world_pos.x,
-         smoke_array[i].world_pos.y, smoke_array[i].world_pos.z);
+  for (int i = 0; i < nr_particles ; ++i)
+  {   //printf("%f %f %f \n", smoke_array[i].world_pos.x,
+      //   smoke_array[i].world_pos.y, smoke_array[i].world_pos.z);
   }
 
   glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles);
@@ -77,7 +77,7 @@ void init_smoke(void)
     glUseProgram(program_billboard);
     glActiveTexture(GL_TEXTURE4);
     glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles);
-    quick_sort(smoke_array, 0, nr_particles, look_dir);
+    quick_sort(smoke_array, 0, nr_particles-1, look_dir);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F,  nr_particles,1, 0,
       GL_RGBA, GL_FLOAT, &smoke_array[0].world_pos.x);
     glUniform1i(glGetUniformLocation(program_billboard, "smokePos"), 4);
@@ -100,10 +100,11 @@ void add_particle(GLfloat x, GLfloat y, GLfloat z)
   //smoke_array[nr_particles].rot = 0;
 
   ++nr_particles;
+  printf("%i\n", nr_particles);
 }
 
 
-#define GROWTH_FACTOR 1000
+#define GROWTH_FACTOR 500
 #define FLOOR_Y_POS -50
 //Iterates over every smoke element and
 //applies a movement function on every particle.
@@ -112,7 +113,7 @@ void smoke_interact_vector_field(int t)
 
   for (int i = 0; i < nr_particles ; ++i)
   {
-    if(smoke_array[i].age > 2.0)
+    if(smoke_array[i].age > 4.0)
         remove_particle(i);
 
     smoke tmp = smoke_array[i];

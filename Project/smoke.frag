@@ -12,5 +12,5 @@ void main(void)
 
        vec4 tex = texture(tex, texCoord);
 
-       outColor = vec4(vec3(tex),1.0/age);
+       outColor = vec4(vec3(tex),1.0/(3*age));
 }
