@@ -9,35 +9,16 @@
 #include <math.h>
 #include "VectorUtils3.h"
 #include "loadobj.h"
-
-#define MAX_PARTICLES 5000
-int nr_particles = 0;
-
-typedef struct smoke
-{
-  vec3 world_pos;
-  GLfloat age;
-//  vec3 view_pos;
-//  GLfloat rot;
-} smoke;
-
-GLuint program_billboard;
-smoke *smoke_array;
-void add_particle(GLfloat x, GLfloat y, GLfloat z);
-void remove_particle(int index);
-
-int partition( smoke a[], int l, int r, vec3 look_vec);
-void quick_sort( smoke a[], int l, int r, vec3 look_vec);
-//GLfloat* convert_to_array(void);
-GLuint smoke_pos_texdata;
+//#include "smoke_emitter.h"
+#include "smoke.h"
 
 //initialises a number of smoke particles.
 void init_smoke(void)
 {
   glUseProgram(program_billboard);
-  int nr =0;
+  //int nr = 0;
   smoke_array = malloc (MAX_PARTICLES * sizeof (smoke));
-
+/*
   for(int i = 0; i < nr; ++i)
   {
     add_particle( 5*cos(i*3.1415/(nr/2) ),0, 5*sin(i*3.1415/(nr/2)));
@@ -45,7 +26,7 @@ void init_smoke(void)
 
   if(nr_particles > 0)
     quick_sort(smoke_array, 0, nr_particles - 1, SetVector(1,0,0));
-
+*/
   glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles);
 
   //init texture data--------------------------------------------------
@@ -87,19 +68,22 @@ void add_particle(GLfloat x, GLfloat y, GLfloat z)
   smoke_array[nr_particles].age = 1;
 
   ++nr_particles;
-  printf("%i\n", nr_particles);
+  //printf("%i\n", nr_particles);
 }
-
-
+//REMOVE
+/*
 #define GROWTH_FACTOR 500
 #define FLOOR_Y_POS -50
 //Iterates over every smoke element and
 //applies a movement function on every particle.
+//probably move this to smoke emitter.
 void smoke_interact_vector_field(int t)
 {
 
   for (int i = 0; i < nr_particles ; ++i)
   {
+    smoke_array[i].world_pos = get_vector_field(smoke_array[i]);
+
     if(smoke_array[i].age > 4.0)
         remove_particle(i);
 
@@ -112,7 +96,7 @@ void smoke_interact_vector_field(int t)
 
   }
 }
-
+*/
 //removes a particle at the designated index
 //moves all objects in the list down one step.
 void remove_particle(int index)

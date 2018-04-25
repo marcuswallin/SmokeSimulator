@@ -10,6 +10,8 @@
 #include "LoadTGA.h"
 #include "cameracontrol.c"
 #include "smoke.c"
+#include "smoke_emitter.c"
+
 
 
 mat4 projectionMatrix;
@@ -32,6 +34,9 @@ TextureData wall_tex, floor_tex, roof_tex, smoke_tex;
 Model *room_model, *floor_model, *roof_model, *billboard_model;
 void draw_room_model(Model *mod, mat4 mtw, mat4 cam, GLfloat trans);
 void draw_billboard(Model *mod, mat4 mtw, mat4 cam);
+
+int scaling_room_side = 75;
+int scaling_room_up = 15;
 
 
 void init(void)
@@ -57,6 +62,7 @@ void init(void)
 	glUseProgram(program_billboard);
 	glUniformMatrix4fv(glGetUniformLocation(program_billboard, "projMatrix"), 1, GL_TRUE, projectionMatrix.m);
 	init_smoke();
+	init_smoke_emitters(scaling_room_up);
 
 
 	//TEXTURES
@@ -104,18 +110,19 @@ void display(void)
 	//DRAW SMOKE---------------------------------------------
 	glDisable(GL_DEPTH_TEST);
 	glUseProgram(program_billboard);
+
+	spawn_smoke();
 	glUniform1i(glGetUniformLocation(program_billboard, "tex"), 3);
 	smoke_interact_vector_field(t);
 	send_smoke_to_GPU(VectorSub(SetVector(0,0,0), get_look_dir()));
 	draw_billboard(billboard_model, mtw_matrix, cam_matrix);
   glEnable(GL_DEPTH_TEST);
 
-  if(t % 5 == 0 && t > 50)
+/*  if(t % 5 == 0 && t > 50)
   {
 		add_particle( 5*cos(t*3.1415/(200) ),-7, 5*sin(t*3.1415/200));
-
 	}
-
+*/
 	t++;
 	//printf("%i\n", t);
 	glutSwapBuffers();
