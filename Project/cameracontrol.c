@@ -18,9 +18,12 @@ GLfloat delta_phi = 0.0f;
 int x = 0;
 int y = 0;
 mat4 trans, rot;
+int room_size_roof, room_size_walls;
 
-void initControls()
+void initControls(int size_walls, int size_roof)
 {
+  room_size_roof = size_roof;
+  room_size_walls = size_walls;
   p = SetVector(0.0f,  -5.0f, 20.0f);
   l = SetVector(0.0f, -5.0f, 0.0f);
   trans = IdentityMatrix();
@@ -60,6 +63,7 @@ mat4 cameraPlacement()
   vec3 v = SetVector(0.0f, 1.0f, 0.0f);
   v = Normalize(v);
 
+  mat4 old_trans = trans;
   glutPassiveMotionFunc(mouse);
   old_theta -= delta_theta;
   old_phi -= delta_phi;
@@ -77,12 +81,12 @@ mat4 cameraPlacement()
   if(glutKeyIsDown('d'))
     trans = Mult(trans, T(+f*cos(old_theta),0,-f*sin(old_theta)));
 
-  /*vec3 move = MultVec3(trans, p);
-  if(move.x < -25 || move.x > 25 ||
-  move.y < -5 || move.y > 5 ||
-  move.z < -25 || move.z > 25 )
-  trans = old_trans;
-  */
+  vec3 move = MultVec3(trans, p);
+  if(move.x < -room_size_walls + 1 || move.x > room_size_walls - 1 ||
+  move.y < -room_size_roof + 1 || move.y > room_size_roof - 2 ||
+  move.z < -room_size_walls + 1  || move.z > room_size_walls - 1  )
+    trans = old_trans;
+
 
   rot = Mult(Ry(old_theta), Rx(old_phi));
 

@@ -49,7 +49,7 @@ void init(void)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//	glCullFace(GL_BACK);
 
-	initControls();
+	initControls(scaling_room_side, scaling_room_up);
 	cameraPlacement();
 
 	projectionMatrix = frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 200.0);
