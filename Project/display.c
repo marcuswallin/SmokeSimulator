@@ -10,22 +10,12 @@
 #include "LoadTGA.h"
 #include "cameracontrol.c"
 #include "smoke.c"
+#include "lamp.c"
 
 
 mat4 projectionMatrix;
 void lightToShader(GLuint program);
 
-Point3D lightSourcesColorsArr[] = { {1.0f, 1.0f, 1.0f},
-{0.0f, 1.0f, 0.0f},
-{1.0f, 1.0f, 1.0f},
-{1.0f, 1.0f, 1.0f} };
-
-GLint isDirectional[] = {0,0,1,1};
-
-Point3D lightSourcesDirectionsPositions[] = { {0.0f, 9.0f, 0.0f},
-{8.0f, 20.0f, 40.0f},
-{-1.0f, 1.0f, 0.0f},
-{0.0f, 1.0f, 1.0f} };
 
 GLuint program_room, program_billboard;
 TextureData wall_tex, floor_tex, roof_tex, smoke_tex;
@@ -40,13 +30,14 @@ void init(void)
 	glClearColor(0.2,0.2,0.5,0);
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
+
 //	glEnable(GL_BLEND);
 //	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//	glCullFace(GL_BACK);
-
+	initLamp();
 	initControls();
 
-	projectionMatrix = frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 200.0);
+	//projectionMatrix = frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 200.0);
 	program_room = loadShaders("wall.vert", "wall.frag");
 	program_billboard = loadShaders("smoke.vert", "smoke.frag");
 
@@ -72,10 +63,12 @@ void init(void)
 	roof_model = LoadModelPlus("objects/roof.obj");
 	billboard_model = LoadModelPlus("objects/billboard.obj");
 
+
 }
 
 
 int t = 0;
+bool key_q_is_down = false;
 
 void display(void)
 {
@@ -85,6 +78,27 @@ void display(void)
 	cam_matrix = cameraPlacement();
 	mtw_matrix = IdentityMatrix();
 
+
+	//DRAW LAMP STUFF
+
+	if(glutKeyIsDown('q') && !key_q_is_down && (current_lamp_index < 6))
+	{
+		key_q_is_down = true;
+		add_lamp(get_view_pos().x,5,get_view_pos().z);
+		current_lamp_index = current_lamp_index + 1;
+
+	}else if(!glutKeyIsDown('q') && key_q_is_down)
+	{
+		key_q_is_down = false;
+	}
+
+	if(glutKeyIsDown('e'))
+	{
+		clear_lamps(program_room);
+	}
+
+	//draw_lamp_with_cord(program_room, mtw_matrix, cam_matrix, -28, 5, -28);
+	draw_all_lamps(program_room, mtw_matrix, cam_matrix);
 	//DRAW SMOKE---------------------------------------------
 	glUseProgram(program_billboard);
 	glUniform1i(glGetUniformLocation(program_billboard, "tex"), 3);
@@ -110,6 +124,10 @@ void display(void)
 
 	t++;
 	//printf("%i\n", t);
+
+
+
+
 	glutSwapBuffers();
 }
 
@@ -137,11 +155,11 @@ void lightToShader(GLuint program)
 	glUseProgram(program);
 	glUniformMatrix4fv(glGetUniformLocation(program, "projMatrix"), 1, GL_TRUE, projectionMatrix.m);
 
-	glUniform3fv(glGetUniformLocation(program, "lightSourcesDirPosArr"),
-	4, &lightSourcesDirectionsPositions[0].x);
+	//glUniform3fv(glGetUniformLocation(program, "lightSourcesDirPosArr"),
+	//4, &lightSourcesDirectionsPositions[0].x);
 	glUniform3fv(glGetUniformLocation(program, "lightSourcesColorArr"),
 	4, &lightSourcesColorsArr[0].x);
-	glUniform1iv(glGetUniformLocation(program, "isDirectional"),
-	4, isDirectional);
+	//glUniform1iv(glGetUniformLocation(program, "isDirectional"),
+	//4, isDirectional);
 
 }

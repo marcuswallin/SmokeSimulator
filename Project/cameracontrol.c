@@ -89,3 +89,8 @@ mat4 cameraPlacement()
   Mult(rot, T(-p.x, -p.y, -p.z)))), l) ,
   v);
 }
+
+vec3 get_view_pos(void)
+{
+  return MultVec3(trans, p);
+}
