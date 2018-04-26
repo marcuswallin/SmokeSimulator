@@ -31,6 +31,30 @@ void init_smoke_emitters(int scaling_up)
 }
 
 
+bool e_down = false;
+bool r_down = false;
+void keyboard_interaction(vec3 pos, vec3 look_dir)
+{
+  if(glutKeyIsDown('e') && !e_down)
+  {
+    e_down = true;
+    add_smoke_emitter(pos.x,-roof_height + 0.1 * roof_height,pos.z);
+  }
+  else if(!glutKeyIsDown('e') && e_down)
+    e_down = false;
+
+
+  if(glutKeyIsDown('r') && nr_emitters > 0 && !r_down)
+  {
+    r_down = true;
+    remove_smoke_emitter(0);
+  }
+  else if(!glutKeyIsDown('r') && r_down)
+    r_down = false;
+
+}
+
+
 void spawn_smoke(void)
 {
   for(int i = 0; i < nr_emitters; ++i)
@@ -70,7 +94,7 @@ void interact_vector_field(smoke *s )
    {
      float dist = distance_to(*s, smoke_emitters[i]);
 
-     s->world_pos.y +=  init_velocity / (30 * dist);// (10000 * dist) *
+     s->world_pos.y +=  init_velocity / (150 + 20*dist);// (10000 * dist) *
                     //    (roof_height - s->world_pos.y);
 
      s->world_pos.x += (s->world_pos.x - smoke_emitters[i].x)/5000;

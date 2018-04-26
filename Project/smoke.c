@@ -30,7 +30,7 @@ void init_smoke(void)
   glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles);
 
   //init texture data--------------------------------------------------
-  glActiveTexture(GL_TEXTURE4);
+  glActiveTexture(GL_TEXTURE15);
   glGenTextures(1, &smoke_pos_texdata);
   glBindTexture(GL_TEXTURE_2D, smoke_pos_texdata);
 
@@ -39,7 +39,7 @@ void init_smoke(void)
 
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F,  nr_particles,1, 0,
     GL_RGBA, GL_FLOAT, &smoke_array[0].world_pos.x);
-  glUniform1i(glGetUniformLocation(program_billboard, "smokePos"), 4);
+  glUniform1i(glGetUniformLocation(program_billboard, "smokePos"), 15);
 }
 
 
@@ -47,12 +47,13 @@ void init_smoke(void)
   void send_smoke_to_GPU(vec3 look_dir)
   {
     glUseProgram(program_billboard);
-    glActiveTexture(GL_TEXTURE4);
+    glActiveTexture(GL_TEXTURE15);
+  //  glUniform1i(glGetUniformLocation(program_billboard, "smokePos"), 15);
     glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles);
     quick_sort(smoke_array, 0, nr_particles-1, look_dir);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F,  nr_particles,1, 0,
       GL_RGBA, GL_FLOAT, &smoke_array[0].world_pos.x);
-    glUniform1i(glGetUniformLocation(program_billboard, "smokePos"), 4);
+
 
   }
 
@@ -70,39 +71,14 @@ void add_particle(GLfloat x, GLfloat y, GLfloat z)
   ++nr_particles;
   //printf("%i\n", nr_particles);
 }
-//REMOVE
-/*
-#define GROWTH_FACTOR 500
-#define FLOOR_Y_POS -50
-//Iterates over every smoke element and
-//applies a movement function on every particle.
-//probably move this to smoke emitter.
-void smoke_interact_vector_field(int t)
-{
 
-  for (int i = 0; i < nr_particles ; ++i)
-  {
-    smoke_array[i].world_pos = get_vector_field(smoke_array[i]);
 
-    if(smoke_array[i].age > 4.0)
-        remove_particle(i);
-
-    smoke tmp = smoke_array[i];
-    smoke_array[i].world_pos.x += tmp.world_pos.x *tmp.world_pos.y / 5000;
-    smoke_array[i].world_pos.y += (GLfloat)(tmp.world_pos.y +
-      FLOOR_Y_POS) / (50*FLOOR_Y_POS) ;
-    smoke_array[i].world_pos.z += tmp.world_pos.z*tmp.world_pos.y / 5000;
-    smoke_array[i].age += (GLfloat) 1/GROWTH_FACTOR;
-
-  }
-}
-*/
 //removes a particle at the designated index
 //moves all objects in the list down one step.
 void remove_particle(int index)
 {
   if (index >= nr_particles || index < 0)
-  return;
+    return;
 
   for(int i = index; i < nr_particles - 1; ++i)
   {

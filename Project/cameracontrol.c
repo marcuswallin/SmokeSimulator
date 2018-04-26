@@ -92,7 +92,10 @@ mat4 cameraPlacement()
   v);
 }
 
-
+vec3 get_view_pos(void)
+{
+  return MultVec3(trans, p);
+}
 
 vec3 get_look_dir(void)
 {

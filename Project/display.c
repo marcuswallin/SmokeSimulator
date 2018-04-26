@@ -30,7 +30,7 @@ Point3D lightSourcesDirectionsPositions[] = { {0.0f, 9.0f, 0.0f},
 {0.0f, 1.0f, 1.0f} };
 
 GLuint program_room, program_billboard;
-TextureData wall_tex, floor_tex, roof_tex, smoke_tex;
+TextureData wall_tex, floor_tex, roof_tex, smoke_tex_1, smoke_tex_2, smoke_tex_3;
 Model *room_model, *floor_model, *roof_model, *billboard_model;
 void draw_room_model(Model *mod, mat4 mtw, mat4 cam, GLfloat trans);
 void draw_billboard(Model *mod, mat4 mtw, mat4 cam);
@@ -73,7 +73,11 @@ void init(void)
 	glActiveTexture(GL_TEXTURE2);
 	LoadTGATexture("objects/roof_1.tga", &roof_tex);
 	glActiveTexture(GL_TEXTURE3);
-	LoadTGATexture("objects/maskros512.tga", &smoke_tex);
+	LoadTGATexture("objects/smoke_texture_1.tga", &smoke_tex_1);
+	glActiveTexture(GL_TEXTURE4);
+	LoadTGATexture("objects/smoke_texture_2.tga", &smoke_tex_2);
+	glActiveTexture(GL_TEXTURE5);
+	LoadTGATexture("objects/smoke_texture_3.tga", &smoke_tex_3);
 
 	room_model = LoadModelPlus("objects/cube_tc.obj");
 	floor_model = LoadModelPlus("objects/floor.obj");
@@ -110,11 +114,12 @@ void display(void)
 	//DRAW SMOKE---------------------------------------------
 	glDisable(GL_DEPTH_TEST);
 	glUseProgram(program_billboard);
-
+  vec3 look_dir = get_look_dir();
+	vec3 view_pos = get_view_pos();
 	spawn_smoke();
-	glUniform1i(glGetUniformLocation(program_billboard, "tex"), 3);
+	keyboard_interaction(view_pos,look_dir);
 	smoke_interact_vector_field(t);
-	send_smoke_to_GPU(VectorSub(SetVector(0,0,0), get_look_dir()));
+	send_smoke_to_GPU(VectorSub(SetVector(0,0,0), look_dir));
 	draw_billboard(billboard_model, mtw_matrix, cam_matrix);
   glEnable(GL_DEPTH_TEST);
 
@@ -141,6 +146,8 @@ void draw_room_model(Model *mod, mat4 mtw, mat4 cam, GLfloat trans)
 void draw_billboard(Model *mod, mat4 mtw, mat4 cam)
 {
 
+	glActiveTexture(GL_TEXTURE5);
+  glUniform1i(glGetUniformLocation(program_billboard, "tex"), 5);
 	glUniformMatrix4fv(glGetUniformLocation(program_billboard, "camMatrix"), 1, GL_TRUE, cam.m);
 	glUniformMatrix4fv(glGetUniformLocation(program_billboard, "mtwMatrix"), 1, GL_TRUE, mtw.m);
 	DrawModelInstanced(mod, program_billboard, "inPosition", NULL, "inTexCoord", nr_particles);
