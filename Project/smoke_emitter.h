@@ -6,18 +6,8 @@
 #define SPAWN_FREQUENCY 10
 #define GROWTH_FACTOR 100
 int nr_emitters = 0;
-vec3 *smoke_emitters;
-
-typedef struct field_generator
-{
-  vec3 world_pos;
-  vec3 z_dir;
-  vec3 R_dir;
-  vec3 phi_dir;
-}
 
 vec3 *smoke_emitters;
-
 
 
 void init_smoke_emitters(int);

@@ -11,6 +11,7 @@
 #include "VectorUtils3.h"
 #include "smoke_emitter.h"
 #include "smoke.h"
+#include "field_generator.c"
 
 
 int roof_height;
@@ -18,14 +19,15 @@ GLfloat init_velocity = 4;
 
 void init_smoke_emitters(int scaling_up)
 {
+  init_generators();
   roof_height = scaling_up;
   srand(time(NULL));
   smoke_emitters = malloc (MAX_EMITTERS * sizeof (vec3));
 
-  int nr = 0;
+  int nr = 2;
   for(int i = 0; i < nr ; ++i)
   {
-    add_smoke_emitter(-20 + 15*i, -scaling_up + 0.1 * scaling_up ,0);
+    add_smoke_emitter(-20 + 15*i, -scaling_up + 0.1 * scaling_up ,-20);
   }
 
 }

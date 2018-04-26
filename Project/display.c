@@ -101,7 +101,7 @@ void display(void)
 
 	glUseProgram(program_room);
 	glUniformMatrix4fv(glGetUniformLocation(program_room, "camMatrix"), 1, GL_TRUE, cam_matrix.m);
-	mtw_matrix = S(75,15,75);
+	mtw_matrix = S(scaling_room_side,scaling_room_up,scaling_room_side);
 	glUniform1i(glGetUniformLocation(program_room, "tex"), 0);
 	draw_room_model(room_model, mtw_matrix, cam_matrix, 0);
 	glUniform1i(glGetUniformLocation(program_room, "tex"), 1);
