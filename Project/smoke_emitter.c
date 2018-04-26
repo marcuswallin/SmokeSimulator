@@ -22,7 +22,7 @@ void init_smoke_emitters(int scaling_up)
   srand(time(NULL));
   smoke_emitters = malloc (MAX_EMITTERS * sizeof (vec3));
 
-  int nr = 3;
+  int nr = 0;
   for(int i = 0; i < nr ; ++i)
   {
     add_smoke_emitter(-20 + 15*i, -scaling_up + 0.1 * scaling_up ,0);
@@ -75,7 +75,7 @@ void smoke_interact_vector_field(int t)
 {
   for(int i = 0; i < nr_particles; ++i)
   {
-    if(smoke_array[i].age > 4.0)
+    if(smoke_array[i].age > 8.0)
     {
       remove_particle(i);
       --i;
@@ -90,16 +90,27 @@ void smoke_interact_vector_field(int t)
 
 void interact_vector_field(smoke *s )
 {
+   float dist_to_floor = roof_height + s->world_pos.y;
+
+   s->world_pos.y +=  init_velocity / (30 + 5* dist_to_floor);
+
+   float f = 0.05;
+
+   s->world_pos.x += f*((float)rand()/ RAND_MAX - 0.5);
+   s->world_pos.z += f*((float)rand()/ RAND_MAX - 0.5);
+
+   s->age += (GLfloat) 1/GROWTH_FACTOR;
    for(int i = 0; i < nr_emitters; ++i)
    {
-     float dist = distance_to(*s, smoke_emitters[i]);
+     //change this
+     //float dist = distance_to(*s, smoke_emitters[i]);
 
-     s->world_pos.y +=  init_velocity / (150 + 20*dist);// (10000 * dist) *
+    // s->world_pos.y +=  init_velocity / (150 + 20*dist);// (10000 * dist) *
                     //    (roof_height - s->world_pos.y);
 
-     s->world_pos.x += (s->world_pos.x - smoke_emitters[i].x)/5000;
-     s->world_pos.z += (s->world_pos.z - smoke_emitters[i].z)/5000;
-     s->age += (GLfloat) 1/GROWTH_FACTOR;
+  //   s->world_pos.x += (s->world_pos.x - smoke_emitters[i].x)/5000;
+  //   s->world_pos.z += (s->world_pos.z - smoke_emitters[i].z)/5000;
+
    }
 }
 

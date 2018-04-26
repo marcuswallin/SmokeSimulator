@@ -7,6 +7,7 @@ uniform sampler2D smokePos;
 
 out float age;
 out vec2 texCoord;
+//out int tex_choice;
 
 uniform int nrParticles;
 uniform mat4 projMatrix;
@@ -18,7 +19,9 @@ void main(void)
 //  vec3 pos = data_SSBO[0];
   mat4 mtw_modified = mtwMatrix;
 
+
   float instance = float(gl_InstanceID);
+  //tex_choice = gl_InstanceID - 3 * floor(instance/3);
   float nr = float(nrParticles);
   float v = (instance ) / nr + 1.0/1000000;
   vec4 texVal  = texture(smokePos, vec2(v, 0));
@@ -34,6 +37,7 @@ void main(void)
   tot[2] = vec4(0.0, 0.0 , texVal.w, 0.0);
 
 	gl_Position = projMatrix * tot *  vec4(inPosition, 1.0);
+
 
   age = texVal.w;
 	texCoord = inTexCoord;

@@ -145,9 +145,12 @@ void draw_room_model(Model *mod, mat4 mtw, mat4 cam, GLfloat trans)
 
 void draw_billboard(Model *mod, mat4 mtw, mat4 cam)
 {
-
+	glActiveTexture(GL_TEXTURE3);
+  glUniform1i(glGetUniformLocation(program_billboard, "tex1"), 3);
+	glActiveTexture(GL_TEXTURE4);
+  glUniform1i(glGetUniformLocation(program_billboard, "tex2"), 4);
 	glActiveTexture(GL_TEXTURE5);
-  glUniform1i(glGetUniformLocation(program_billboard, "tex"), 5);
+  glUniform1i(glGetUniformLocation(program_billboard, "tex3"), 5);
 	glUniformMatrix4fv(glGetUniformLocation(program_billboard, "camMatrix"), 1, GL_TRUE, cam.m);
 	glUniformMatrix4fv(glGetUniformLocation(program_billboard, "mtwMatrix"), 1, GL_TRUE, mtw.m);
 	DrawModelInstanced(mod, program_billboard, "inPosition", NULL, "inTexCoord", nr_particles);
