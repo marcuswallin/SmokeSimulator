@@ -27,6 +27,7 @@ void init_smoke(void)
   if(nr_particles > 0)
     quick_sort(smoke_array, 0, nr_particles - 1, SetVector(1,0,0));
 */
+
   glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles*2);
 
   //init texture data--------------------------------------------------
@@ -70,7 +71,7 @@ void add_particle(GLfloat x, GLfloat y, GLfloat z)
   smoke_array[nr_particles].vel = SetVector(2,1,1);
   smoke_array[nr_particles].tex = (float)(nr_particles % 3);
   ++nr_particles;
-  //printf("%i\n", nr_particles);
+
 }
 
 

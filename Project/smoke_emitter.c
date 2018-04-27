@@ -20,6 +20,9 @@ GLfloat init_velocity = 4;
 void init_smoke_emitters(int scaling_up)
 {
   init_generators();
+  int particle_estimation = (int) (MAX_EMITTERS * 1.0 / SPAWN_FREQUENCY *
+     (MAX_AGE - 1)*GROWTH_FACTOR);
+  printf("\nApproximate max nr of particles: %i\n \n", particle_estimation );
   roof_height = scaling_up;
   srand(time(NULL));
   smoke_emitters = malloc (MAX_EMITTERS * sizeof (vec3));
@@ -77,7 +80,7 @@ void smoke_interact_vector_field(int t)
 {
   for(int i = 0; i < nr_particles; ++i)
   {
-    if(smoke_array[i].age > 8.0)
+    if(smoke_array[i].age > MAX_AGE)
     {
       remove_particle(i);
       --i;

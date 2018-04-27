@@ -3,8 +3,9 @@
 #define SMOKE_EMITTER_H
 
 #define MAX_EMITTERS 6
-#define SPAWN_FREQUENCY 30
+#define SPAWN_FREQUENCY 15
 #define GROWTH_FACTOR 100
+#define MAX_AGE 8.0
 int nr_emitters = 0;
 
 vec3 *smoke_emitters;

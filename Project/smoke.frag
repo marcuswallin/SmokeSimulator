@@ -23,5 +23,5 @@ void main(void)
   else
     tex_color = vec4(1);
 
-  outColor = vec4(vec3(tex_color), tex_color.w* 1.0/(age));
+  outColor = vec4(vec3(tex_color), tex_color.w* 1.0/(3*age));
 }
