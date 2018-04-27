@@ -27,7 +27,7 @@ void init_smoke(void)
   if(nr_particles > 0)
     quick_sort(smoke_array, 0, nr_particles - 1, SetVector(1,0,0));
 */
-  glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles);
+  glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles*2);
 
   //init texture data--------------------------------------------------
   glActiveTexture(GL_TEXTURE15);
@@ -37,7 +37,7 @@ void init_smoke(void)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F,  nr_particles,1, 0,
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F,  nr_particles*2,1, 0,
     GL_RGBA, GL_FLOAT, &smoke_array[0].world_pos.x);
   glUniform1i(glGetUniformLocation(program_billboard, "smokePos"), 15);
 }
@@ -49,9 +49,9 @@ void init_smoke(void)
     glUseProgram(program_billboard);
     glActiveTexture(GL_TEXTURE15);
   //  glUniform1i(glGetUniformLocation(program_billboard, "smokePos"), 15);
-    glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles);
+    glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles * 2);
     quick_sort(smoke_array, 0, nr_particles-1, look_dir);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F,  nr_particles,1, 0,
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F,  nr_particles*2,1, 0,
       GL_RGBA, GL_FLOAT, &smoke_array[0].world_pos.x);
 
 
@@ -67,7 +67,8 @@ void add_particle(GLfloat x, GLfloat y, GLfloat z)
   vec3 pos = SetVector(x,y,z);
   smoke_array[nr_particles].world_pos = pos;
   smoke_array[nr_particles].age = 1;
-
+  smoke_array[nr_particles].vel = SetVector(2,1,1);
+  smoke_array[nr_particles].tex = (float)(nr_particles % 3);
   ++nr_particles;
   //printf("%i\n", nr_particles);
 }

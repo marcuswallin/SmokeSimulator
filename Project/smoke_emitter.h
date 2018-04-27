@@ -3,7 +3,7 @@
 #define SMOKE_EMITTER_H
 
 #define MAX_EMITTERS 6
-#define SPAWN_FREQUENCY 10
+#define SPAWN_FREQUENCY 30
 #define GROWTH_FACTOR 100
 int nr_emitters = 0;
 

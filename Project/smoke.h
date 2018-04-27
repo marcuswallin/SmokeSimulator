@@ -9,7 +9,8 @@ typedef struct smoke
 {
   vec3 world_pos;
   GLfloat age;
-//  vec3 view_pos;
+  vec3 vel;
+  GLfloat tex;
 //  GLfloat rot;
 } smoke;
 
