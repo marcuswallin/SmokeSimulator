@@ -46,7 +46,7 @@ vec3 r;
 		   r = normalize(reflect( exSurface - lightView, normalize(exNormal)));
 			 float to_point = length(lightView - exSurface);
 
-				intensity = 1;
+				intensity = 0.8;
 		}
 		specular = dot(r,v);
 		if (specular > 0.0)
@@ -55,7 +55,7 @@ vec3 r;
 		specular = clamp(specular, 0, 1);
 		shade =  diffuse + specular;
 
-		color = color + (vec3(shade) * lightSourcesColorArr[i]);
+		color = color + (vec3(shade) * 0.7*lightSourcesColorArr[i]);
   }
     outColor = vec4(color, 1.0) * texture(tex, texCoord);
 

@@ -3,6 +3,7 @@
 #define SMOKE_H
 
 #define MAX_PARTICLES 5000
+GLfloat init_velocity = 0.1;
 int nr_particles = 0;
 
 typedef struct smoke

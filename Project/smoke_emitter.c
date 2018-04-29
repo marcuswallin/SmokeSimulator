@@ -13,10 +13,6 @@
 #include "smoke.h"
 
 
-
-int roof_height;
-GLfloat init_velocity = 4;
-
 void init_smoke_emitters(int scaling_up)
 {
   init_generators();
@@ -28,14 +24,13 @@ void init_smoke_emitters(int scaling_up)
   srand(time(NULL));
   smoke_emitters = malloc (MAX_EMITTERS * sizeof (vec3));
 
-  int nr = 2;
+  int nr = 1;
   for(int i = 0; i < nr ; ++i)
   {
     add_smoke_emitter(-20 + 15*i, -scaling_up + 0.1 * scaling_up ,-20);
   }
 
 }
-
 
 
 bool e_down = false;
@@ -106,25 +101,25 @@ void smoke_interact_vector_field(int t)
   }
 }
 
-
+//manipulates the speed of the particles.
+//which is later added to the particle's position.
 void interact_vector_field(smoke *s )
 {
    float dist_to_floor = roof_height + s->pos.y;
 
-   s->pos.y +=  init_velocity / (30 + 5* dist_to_floor);
+   float f = 0.002;
+   s->vel.x += f*((float)rand()/ RAND_MAX - 0.5);
+   s->vel.z += f*((float)rand()/ RAND_MAX - 0.5);
 
-   float f = 0.05;
-
-   s->pos.x += f*((float)rand()/ RAND_MAX - 0.5);
-   s->pos.z += f*((float)rand()/ RAND_MAX - 0.5);
-
+   roof_interaction(s);
+   field_generator_interaction(s);
    s->age += (GLfloat) 1/GROWTH_FACTOR;
-   for(int i = 0; i < nr_generators; ++i)
-   {
+  // for(int i = 0; i < nr_generators; ++i)
+   //{
 
-     vec3 rel_pos_gen = get_coord_new_system(s->pos, i);
+  //   vec3 rel_pos_gen = get_coord_new_system(s->pos, i);
 
-     
+
      //change this
      //float dist = distance_to(*s, smoke_emitters[i]);
 
@@ -134,14 +129,51 @@ void interact_vector_field(smoke *s )
   //   s->world_pos.x += (s->world_pos.x - smoke_emitters[i].x)/5000;
   //   s->world_pos.z += (s->world_pos.z - smoke_emitters[i].z)/5000;
 
-   }
+  // }
+  //change this
+   s->pos.x += s->vel.x*0.95;
+   s->pos.y += s->vel.y*0.95;
+   s->pos.z += s->vel.z*0.95;
+
 }
 
-GLfloat distance_to(smoke s , vec3 emitter)
+//
+void roof_interaction(smoke  *s)
 {
-   return sqrt( pow((s.pos.x - emitter.x), 2) +
-                pow((s.pos.y - emitter.y), 2) +
-                pow((s.pos.z - emitter.z), 2));
+  GLfloat diff = roof_height - s->pos.y;
+  s->vel.y = s->vel.y*(1-(float)1/(25*diff));
+}
+
+void field_generator_interaction(smoke *s)
+{
+//  printf("%i\n", nr_generators);
+
+  for(int index = 0; index < nr_generators; index++)
+  {
+     vec3 rel_pos_gen = get_coord_new_system(s->pos, index);
+    // printf("%f %i\n", rel_pos_gen.x, index);
+    if(rel_pos_gen.z < 0 || rel_pos_gen.z > 30 ||
+      sqrt(pow(rel_pos_gen.x,2) + pow(rel_pos_gen.y,2)) > 10)
+      continue;
+
+
+    vec3 rel_speed = get_vel_new_system(s->vel, index);
+  //  printf("%f\n", rel_speed.z);
+    rel_speed.z += (float)1/(1+3*rel_pos_gen.z);
+
+    vec3 new_speed_old_sys = MultMat3Vec3(generators[index].inverseT, rel_speed);
+    s->vel.x = new_speed_old_sys.x;
+    s->vel.y = new_speed_old_sys.y;
+    s->vel.z = new_speed_old_sys.z;
+
+  }
+}
+
+GLfloat distance_to(smoke s , vec3 other)
+{
+   return sqrt( pow((s.pos.x - other.x), 2) +
+                pow((s.pos.y - other.y), 2) +
+                pow((s.pos.z - other.z), 2));
 }
 
 
@@ -170,6 +202,8 @@ void remove_smoke_emitter(int index)
   --nr_emitters;
 }
 
+
+//GENERATORS------------------------------------------------------------------------------
 //input must be normalized
 mat3 get_trans_matrix(vec3 look_dir)
 {
@@ -196,8 +230,14 @@ vec3 get_coord_new_system(vec3 pos, int gen_index)
 {
    vec3 rel_pos = VectorSub(pos, generators[gen_index].pos);
    return MultMat3Vec3(generators[gen_index].T, rel_pos);
-
 }
+
+vec3 get_vel_new_system(vec3 vel, int gen_index)
+{
+   return MultMat3Vec3(generators[gen_index].T, vel);
+}
+
+
 
 
 void init_generators(void)
@@ -213,6 +253,8 @@ void add_field_generator(GLfloat x, GLfloat y, GLfloat z, vec3 look_dir)
 
   generators[nr_generators].pos = SetVector(x,y,z);
   generators[nr_generators].T = get_trans_matrix(look_dir);
+  generators[nr_generators].inverseT = InvertMat3(generators[nr_generators].T);
+  printf("%f %f %f \n", generators[nr_generators].pos.x, generators[nr_generators].pos.y, generators[nr_generators].pos.z);
   ++nr_generators;
 
 }
