@@ -11,7 +11,7 @@
 #include "VectorUtils3.h"
 #include "smoke_emitter.h"
 #include "smoke.h"
-#include "field_generator.c"
+
 
 
 int roof_height;
@@ -20,6 +20,7 @@ GLfloat init_velocity = 4;
 void init_smoke_emitters(int scaling_up)
 {
   init_generators();
+
   int particle_estimation = (int) (MAX_EMITTERS * 1.0 / SPAWN_FREQUENCY *
      (MAX_AGE - 1)*GROWTH_FACTOR);
   printf("\nApproximate max nr of particles: %i\n \n", particle_estimation );
@@ -36,8 +37,10 @@ void init_smoke_emitters(int scaling_up)
 }
 
 
+
 bool e_down = false;
 bool r_down = false;
+bool g_down = false;
 void keyboard_interaction(vec3 pos, vec3 look_dir)
 {
   if(glutKeyIsDown('e') && !e_down)
@@ -56,6 +59,17 @@ void keyboard_interaction(vec3 pos, vec3 look_dir)
   }
   else if(!glutKeyIsDown('r') && r_down)
     r_down = false;
+
+
+  if(glutKeyIsDown('g') && !g_down)
+  {
+    g_down = true;
+    add_field_generator(pos.x,pos.y,pos.z, look_dir);
+  }
+  else if(!glutKeyIsDown('g') && g_down)
+    g_down = false;
+
+
 
 }
 
@@ -95,18 +109,22 @@ void smoke_interact_vector_field(int t)
 
 void interact_vector_field(smoke *s )
 {
-   float dist_to_floor = roof_height + s->world_pos.y;
+   float dist_to_floor = roof_height + s->pos.y;
 
-   s->world_pos.y +=  init_velocity / (30 + 5* dist_to_floor);
+   s->pos.y +=  init_velocity / (30 + 5* dist_to_floor);
 
    float f = 0.05;
 
-   s->world_pos.x += f*((float)rand()/ RAND_MAX - 0.5);
-   s->world_pos.z += f*((float)rand()/ RAND_MAX - 0.5);
+   s->pos.x += f*((float)rand()/ RAND_MAX - 0.5);
+   s->pos.z += f*((float)rand()/ RAND_MAX - 0.5);
 
    s->age += (GLfloat) 1/GROWTH_FACTOR;
-   for(int i = 0; i < nr_emitters; ++i)
+   for(int i = 0; i < nr_generators; ++i)
    {
+
+     vec3 rel_pos_gen = get_coord_new_system(s->pos, i);
+
+     
      //change this
      //float dist = distance_to(*s, smoke_emitters[i]);
 
@@ -121,11 +139,10 @@ void interact_vector_field(smoke *s )
 
 GLfloat distance_to(smoke s , vec3 emitter)
 {
-   return sqrt( pow((s.world_pos.x - emitter.x), 2) +
-                pow((s.world_pos.y - emitter.y), 2) +
-                pow((s.world_pos.z - emitter.z), 2));
+   return sqrt( pow((s.pos.x - emitter.x), 2) +
+                pow((s.pos.y - emitter.y), 2) +
+                pow((s.pos.z - emitter.z), 2));
 }
-
 
 
 void add_smoke_emitter(GLfloat x, GLfloat y, GLfloat z)
@@ -151,4 +168,66 @@ void remove_smoke_emitter(int index)
   }
 
   --nr_emitters;
+}
+
+//input must be normalized
+mat3 get_trans_matrix(vec3 look_dir)
+{
+  mat3 trans;
+  //adding look dir as z-drection
+  trans.m[6] = look_dir.x;
+  trans.m[7] = look_dir.y;
+  trans.m[8] = look_dir.z;
+
+  vec3 ydir = Normalize(SetVector(look_dir.y,  look_dir.z - look_dir.x , -look_dir.y));
+  trans.m[3] = ydir.x;
+  trans.m[4] = ydir.y;
+  trans.m[5] = ydir.z;
+
+  vec3 xdir = Normalize(CrossProduct(ydir, look_dir));
+  trans.m[0] = xdir.x;
+  trans.m[1] = xdir.y;
+  trans.m[2] = xdir.z;
+
+  return trans;
+}
+
+vec3 get_coord_new_system(vec3 pos, int gen_index)
+{
+   vec3 rel_pos = VectorSub(pos, generators[gen_index].pos);
+   return MultMat3Vec3(generators[gen_index].T, rel_pos);
+
+}
+
+
+void init_generators(void)
+{
+  generators =  malloc (MAX_GENERATORS * sizeof (field_generator));
+}
+
+
+void add_field_generator(GLfloat x, GLfloat y, GLfloat z, vec3 look_dir)
+{
+  if(nr_generators >= MAX_GENERATORS)
+    return;
+
+  generators[nr_generators].pos = SetVector(x,y,z);
+  generators[nr_generators].T = get_trans_matrix(look_dir);
+  ++nr_generators;
+
+}
+
+//removes a generator at the designated index
+//moves all objects in the list down one step.
+void remove_generator(int index)
+{
+  if (index >= nr_generators || index < 0)
+    return;
+
+  for(int i = index; i < nr_generators - 1; ++i)
+  {
+    generators[i] = generators[i + 1];
+  }
+
+  --nr_generators;
 }

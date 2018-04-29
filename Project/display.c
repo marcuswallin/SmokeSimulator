@@ -123,13 +123,13 @@ void display(void)
 	draw_billboard(billboard_model, mtw_matrix, cam_matrix);
   glEnable(GL_DEPTH_TEST);
 
-/*  if(t % 5 == 0 && t > 50)
-  {
-		add_particle( 5*cos(t*3.1415/(200) ),-7, 5*sin(t*3.1415/200));
-	}
-*/
+
+
 	t++;
-	//printf("%i\n", t);
+//	if(t%10 == 0 && nr_generators > 0){
+	//vec3 post = get_coord_new_system(view_pos, 0);
+	//printf("%f %f \n", sqrt(pow(post.x,2) + pow(post.y,2)), post.z);
+//}
 	glutSwapBuffers();
 }
 

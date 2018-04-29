@@ -28,7 +28,7 @@ void init_smoke(void)
     quick_sort(smoke_array, 0, nr_particles - 1, SetVector(1,0,0));
 */
 
-  glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles*2);
+  glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles);
 
   //init texture data--------------------------------------------------
   glActiveTexture(GL_TEXTURE15);
@@ -38,8 +38,8 @@ void init_smoke(void)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F,  nr_particles*2,1, 0,
-    GL_RGBA, GL_FLOAT, &smoke_array[0].world_pos.x);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 2, nr_particles, 0,
+    GL_RGBA, GL_FLOAT, &smoke_array[0].pos.x);
   glUniform1i(glGetUniformLocation(program_billboard, "smokePos"), 15);
 }
 
@@ -50,10 +50,10 @@ void init_smoke(void)
     glUseProgram(program_billboard);
     glActiveTexture(GL_TEXTURE15);
   //  glUniform1i(glGetUniformLocation(program_billboard, "smokePos"), 15);
-    glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles * 2);
+    glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles );
     quick_sort(smoke_array, 0, nr_particles-1, look_dir);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F,  nr_particles*2,1, 0,
-      GL_RGBA, GL_FLOAT, &smoke_array[0].world_pos.x);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 2, nr_particles, 0,
+      GL_RGBA, GL_FLOAT, &smoke_array[0].pos.x);
 
 
   }
@@ -66,7 +66,7 @@ void add_particle(GLfloat x, GLfloat y, GLfloat z)
     return;
 
   vec3 pos = SetVector(x,y,z);
-  smoke_array[nr_particles].world_pos = pos;
+  smoke_array[nr_particles].pos = pos;
   smoke_array[nr_particles].age = 1;
   smoke_array[nr_particles].vel = SetVector(2,1,1);
   smoke_array[nr_particles].tex = (float)(nr_particles % 3);
@@ -113,13 +113,13 @@ void quick_sort( smoke a[], int l, int r, vec3 look_dir)
 int partition( smoke a[], int l, int r, vec3 look_dir) {
    int i, j;
    smoke t;
-   GLfloat pivot = DotProduct(a[l].world_pos, look_dir);
+   GLfloat pivot = DotProduct(a[l].pos, look_dir);
    i = l; j = r+1;
 
    while( 1)
    {
-   	do ++i; while( DotProduct(a[i].world_pos, look_dir) <= pivot && i <= r );
-   	do --j; while( DotProduct(a[j].world_pos, look_dir) > pivot );
+   	do ++i; while( DotProduct(a[i].pos, look_dir) <= pivot && i <= r );
+   	do --j; while( DotProduct(a[j].pos, look_dir) > pivot );
    	if( i >= j ) break;
    	t = a[i]; a[i] = a[j]; a[j] = t;
    }

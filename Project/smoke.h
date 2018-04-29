@@ -7,7 +7,7 @@ int nr_particles = 0;
 
 typedef struct smoke
 {
-  vec3 world_pos;
+  vec3 pos;
   GLfloat age;
   vec3 vel;
   GLfloat tex;
