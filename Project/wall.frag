@@ -54,8 +54,9 @@ vec3 r;
 
 		specular = clamp(specular, 0, 1);
 		shade =  diffuse + specular;
-
-		color = color + (vec3(shade) * 0.7*lightSourcesColorArr[i]);
+    //probably change coeffiecient back
+    //CHANGE
+		color = color + (vec3(shade) * 0.6*lightSourcesColorArr[i]);
   }
     outColor = vec4(color, 1.0) * texture(tex, texCoord);
 

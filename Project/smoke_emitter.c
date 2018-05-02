@@ -22,12 +22,12 @@ void init_smoke_emitters(int scaling_up)
   printf("\nApproximate max nr of particles: %i\n \n", particle_estimation );
   roof_height = scaling_up;
   srand(time(NULL));
-  smoke_emitters = malloc (MAX_EMITTERS * sizeof (vec3));
+  smoke_emitters = malloc (MAX_EMITTERS * sizeof (field_generator));
 
   int nr = 1;
   for(int i = 0; i < nr ; ++i)
   {
-    add_smoke_emitter(-20 + 15*i, -scaling_up + 0.1 * scaling_up ,-20);
+    add_smoke_emitter(-20 + 15*i, -scaling_up + 0.1 * scaling_up ,-20, SetVector(0,0,1));
   }
 
 }
@@ -41,7 +41,8 @@ void keyboard_interaction(vec3 pos, vec3 look_dir)
   if(glutKeyIsDown('e') && !e_down)
   {
     e_down = true;
-    add_smoke_emitter(pos.x,-roof_height + 0.1 * roof_height,pos.z);
+    add_smoke_emitter(pos.x, pos.y, pos.z, look_dir);
+  //  add_smoke_emitter(pos.x,-roof_height + 0.1 * roof_height,pos.z);
   }
   else if(!glutKeyIsDown('e') && e_down)
     e_down = false;
@@ -50,7 +51,7 @@ void keyboard_interaction(vec3 pos, vec3 look_dir)
   if(glutKeyIsDown('r') && nr_emitters > 0 && !r_down)
   {
     r_down = true;
-    remove_smoke_emitter(0);
+  //  remove_smoke_emitter(0);
   }
   else if(!glutKeyIsDown('r') && r_down)
     r_down = false;
@@ -64,8 +65,6 @@ void keyboard_interaction(vec3 pos, vec3 look_dir)
   else if(!glutKeyIsDown('g') && g_down)
     g_down = false;
 
-
-
 }
 
 
@@ -78,7 +77,7 @@ void spawn_smoke(void)
     {
       float start_x = (float) r_num / RAND_MAX - 0.5;
       float start_y = (float) rand() / RAND_MAX - 0.5;
-      vec3 e = smoke_emitters[i];
+      vec3 e = smoke_emitters[i].pos;
 
       add_particle(e.x+start_x*2, e.y+start_y*2, e.z);
     }
@@ -105,35 +104,24 @@ void smoke_interact_vector_field(int t)
 //which is later added to the particle's position.
 void interact_vector_field(smoke *s )
 {
-   float dist_to_floor = roof_height + s->pos.y;
 
-   float f = 0.002;
+   float f = 0.006;
    s->vel.x += f*((float)rand()/ RAND_MAX - 0.5);
    s->vel.z += f*((float)rand()/ RAND_MAX - 0.5);
 
    roof_interaction(s);
    field_generator_interaction(s);
    s->age += (GLfloat) 1/GROWTH_FACTOR;
-  // for(int i = 0; i < nr_generators; ++i)
-   //{
 
-  //   vec3 rel_pos_gen = get_coord_new_system(s->pos, i);
+   //apply friction
+   s->vel.x = s->vel.x*FRICTION;
+   s->vel.y = s->vel.y*FRICTION;
+   s->vel.z = s->vel.z*FRICTION;
 
-
-     //change this
-     //float dist = distance_to(*s, smoke_emitters[i]);
-
-    // s->world_pos.y +=  init_velocity / (150 + 20*dist);// (10000 * dist) *
-                    //    (roof_height - s->world_pos.y);
-
-  //   s->world_pos.x += (s->world_pos.x - smoke_emitters[i].x)/5000;
-  //   s->world_pos.z += (s->world_pos.z - smoke_emitters[i].z)/5000;
-
-  // }
-  //change this
-   s->pos.x += s->vel.x*0.95;
-   s->pos.y += s->vel.y*0.95;
-   s->pos.z += s->vel.z*0.95;
+   //update position
+   s->pos.x += s->vel.x;
+   s->pos.y += s->vel.y;
+   s->pos.z += s->vel.z;
 
 }
 
@@ -141,30 +129,44 @@ void interact_vector_field(smoke *s )
 void roof_interaction(smoke  *s)
 {
   GLfloat diff = roof_height - s->pos.y;
-  s->vel.y = s->vel.y*(1-(float)1/(25*diff));
+  s->vel.y = (Y_VELOCITY + s->vel.y)*(1-(float)1/(10*diff));
 }
 
 void field_generator_interaction(smoke *s)
 {
-//  printf("%i\n", nr_generators);
+
 
   for(int index = 0; index < nr_generators; index++)
   {
      vec3 rel_pos_gen = get_coord_new_system(s->pos, index);
-    // printf("%f %i\n", rel_pos_gen.x, index);
-    if(rel_pos_gen.z < 0 || rel_pos_gen.z > 30 ||
+
+    if(rel_pos_gen.z < 0 || rel_pos_gen.z > 80 ||
       sqrt(pow(rel_pos_gen.x,2) + pow(rel_pos_gen.y,2)) > 10)
       continue;
 
-
     vec3 rel_speed = get_vel_new_system(s->vel, index);
-  //  printf("%f\n", rel_speed.z);
-    rel_speed.z += (float)1/(1+3*rel_pos_gen.z);
 
+    //particles get a push in z-dir
+    rel_speed.z += FIELD_STRENGTH/(30+2*rel_pos_gen.z);
+
+    //Particle gets a radial velocity
+    GLfloat rel_dist = sqrt( pow(rel_pos_gen.x, 2) + pow(rel_pos_gen.y, 2));
+    GLfloat spread_coeff = SPREAD / (10 + rel_dist);
+    rel_speed.x += rel_pos_gen.x*spread_coeff;
+    rel_speed.y += rel_pos_gen.y*spread_coeff;
+
+    //convert back to world coordinates
     vec3 new_speed_old_sys = MultMat3Vec3(generators[index].inverseT, rel_speed);
     s->vel.x = new_speed_old_sys.x;
     s->vel.y = new_speed_old_sys.y;
     s->vel.z = new_speed_old_sys.z;
+
+    //makes particles age quicker when blown by a fan
+    if(rel_pos_gen.z < 1)
+      s->age += 1/(GROWTH_FACTOR);
+    else
+      s->age += 1/(GROWTH_FACTOR*rel_pos_gen.z);
+
 
   }
 }
@@ -177,16 +179,19 @@ GLfloat distance_to(smoke s , vec3 other)
 }
 
 
-void add_smoke_emitter(GLfloat x, GLfloat y, GLfloat z)
+void add_smoke_emitter( GLfloat x, GLfloat y, GLfloat z, vec3 look_dir)
 {
   if(nr_emitters >= MAX_EMITTERS)
     return;
 
-  smoke_emitters[nr_emitters] = SetVector(x,y,z);
+  smoke_emitters[nr_emitters].pos = SetVector(x,y,z);
+  smoke_emitters[nr_emitters].T = get_trans_matrix(look_dir);
+  smoke_emitters[nr_emitters].inverseT = InvertMat3(smoke_emitters[nr_emitters].T);
+  printf("%f %f %f \n", smoke_emitters[nr_emitters].pos.x, smoke_emitters[nr_emitters].pos.y, smoke_emitters[nr_emitters].pos.z);
   ++nr_emitters;
 
 }
-
+/*
 //removes a particle at the designated index
 //moves all objects in the list down one step.
 void remove_smoke_emitter(int index)
@@ -201,7 +206,7 @@ void remove_smoke_emitter(int index)
 
   --nr_emitters;
 }
-
+*/
 
 //GENERATORS------------------------------------------------------------------------------
 //input must be normalized
@@ -258,6 +263,8 @@ void add_field_generator(GLfloat x, GLfloat y, GLfloat z, vec3 look_dir)
   ++nr_generators;
 
 }
+
+
 
 //removes a generator at the designated index
 //moves all objects in the list down one step.

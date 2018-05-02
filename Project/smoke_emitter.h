@@ -6,6 +6,10 @@
 #define SPAWN_FREQUENCY 10
 #define GROWTH_FACTOR 100
 #define MAX_AGE 8.0
+#define FRICTION 0.98
+#define Y_VELOCITY 0.002
+#define FIELD_STRENGTH 0.3
+#define SPREAD 0.003
 int nr_emitters = 0;
 int nr_generators = 0;
 int roof_height;
@@ -20,7 +24,7 @@ typedef struct field_generator
 } field_generator;
 
 field_generator *generators;
-vec3 *smoke_emitters;
+field_generator *smoke_emitters;
 
 mat3 get_trans_matrix(vec3 look_dir);
 vec3 get_coord_new_system(vec3 pos, int gen_index);
@@ -29,8 +33,9 @@ void field_generator_interaction(smoke *s);
 
 void init_generators(void);
 void init_smoke_emitters(int);
-void add_smoke_emitter(GLfloat x, GLfloat y, GLfloat z);
-void remove_smoke_emitter(int index);
+void add_smoke_emitter( GLfloat x, GLfloat y, GLfloat z, vec3 look_dir);
+//void add_smoke_emitter(GLfloat x, GLfloat y, GLfloat z);
+//void remove_smoke_emitter(int index);
 void roof_interaction(smoke  *s);
 
 void interact_vector_field(smoke *s );
