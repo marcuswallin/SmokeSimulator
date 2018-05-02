@@ -141,7 +141,7 @@ void field_generator_interaction(smoke *s)
   {
      vec3 rel_pos_gen = get_coord_new_system(s->pos, index);
 
-    if(rel_pos_gen.z < 0 || rel_pos_gen.z > 50 ||
+    if(rel_pos_gen.z < 0 || rel_pos_gen.z > 80 ||
       sqrt(pow(rel_pos_gen.x,2) + pow(rel_pos_gen.y,2)) > 10)
       continue;
 
