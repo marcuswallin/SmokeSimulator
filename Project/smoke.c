@@ -60,7 +60,7 @@ void init_smoke(void)
 
 //Adds a smoke particle at the end of the smoke array.
 //If the smoke_array is already full, then this will not do anything.
-void add_particle(GLfloat x, GLfloat y, GLfloat z)
+void add_particle(GLfloat x, GLfloat y, GLfloat z, vec3 init_vel)
 {
   if(nr_particles >= MAX_PARTICLES)
     return;
@@ -68,7 +68,7 @@ void add_particle(GLfloat x, GLfloat y, GLfloat z)
   vec3 pos = SetVector(x,y,z);
   smoke_array[nr_particles].pos = pos;
   smoke_array[nr_particles].age = 1;
-  smoke_array[nr_particles].vel = SetVector(0, init_velocity,0);
+  smoke_array[nr_particles].vel = init_vel;
   smoke_array[nr_particles].tex = (float)(nr_particles % 3);
   ++nr_particles;
 

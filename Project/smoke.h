@@ -17,7 +17,7 @@ typedef struct smoke
 
 GLuint program_billboard;
 smoke *smoke_array;
-void add_particle(GLfloat x, GLfloat y, GLfloat z);
+void add_particle(GLfloat x, GLfloat y, GLfloat z, vec3 init_vel);
 void remove_particle(int index);
 void init_smoke(void);
 

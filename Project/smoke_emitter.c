@@ -27,7 +27,8 @@ void init_smoke_emitters(int scaling_up)
   int nr = 1;
   for(int i = 0; i < nr ; ++i)
   {
-    add_smoke_emitter(-20 + 15*i, -scaling_up + 0.1 * scaling_up ,-20, SetVector(0,0,1));
+    add_smoke_emitter(-20 + 15*i, -scaling_up + 0.1 * scaling_up ,-20,
+       ScalarMult(SetVector(0,1,0), 0.2));
   }
 
 }
@@ -78,8 +79,8 @@ void spawn_smoke(void)
       float start_x = (float) r_num / RAND_MAX - 0.5;
       float start_y = (float) rand() / RAND_MAX - 0.5;
       vec3 e = smoke_emitters[i].pos;
-
-      add_particle(e.x+start_x*2, e.y+start_y*2, e.z);
+      vec3 init_vel = ScalarMult(smoke_emitters[i].dir, 0.2);
+      add_particle(e.x+start_x*2, e.y+start_y*2, e.z, init_vel);
     }
   }
 }
@@ -140,14 +141,14 @@ void field_generator_interaction(smoke *s)
   {
      vec3 rel_pos_gen = get_coord_new_system(s->pos, index);
 
-    if(rel_pos_gen.z < 0 || rel_pos_gen.z > 80 ||
+    if(rel_pos_gen.z < 0 || rel_pos_gen.z > 50 ||
       sqrt(pow(rel_pos_gen.x,2) + pow(rel_pos_gen.y,2)) > 10)
       continue;
 
     vec3 rel_speed = get_vel_new_system(s->vel, index);
 
     //particles get a push in z-dir
-    rel_speed.z += FIELD_STRENGTH/(30+2*rel_pos_gen.z);
+    rel_speed.z += FIELD_STRENGTH/(5+rel_pos_gen.z);
 
     //Particle gets a radial velocity
     GLfloat rel_dist = sqrt( pow(rel_pos_gen.x, 2) + pow(rel_pos_gen.y, 2));
@@ -185,6 +186,7 @@ void add_smoke_emitter( GLfloat x, GLfloat y, GLfloat z, vec3 look_dir)
     return;
 
   smoke_emitters[nr_emitters].pos = SetVector(x,y,z);
+  smoke_emitters[nr_emitters].dir = look_dir;
   smoke_emitters[nr_emitters].T = get_trans_matrix(look_dir);
   smoke_emitters[nr_emitters].inverseT = InvertMat3(smoke_emitters[nr_emitters].T);
   printf("%f %f %f \n", smoke_emitters[nr_emitters].pos.x, smoke_emitters[nr_emitters].pos.y, smoke_emitters[nr_emitters].pos.z);
