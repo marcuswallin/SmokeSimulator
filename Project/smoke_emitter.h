@@ -2,8 +2,9 @@
 #ifndef SMOKE_EMITTER_H
 #define SMOKE_EMITTER_H
 
-#define MAX_EMITTERS 3
-#define SPAWN_FREQUENCY 1
+#define MAX_GENERATORS 4
+#define MAX_EMITTERS 4
+#define SPAWN_FREQUENCY 3
 #define GROWTH_FACTOR 100
 #define MAX_AGE 8.0
 #define FRICTION 0.98
@@ -14,7 +15,7 @@ int nr_emitters = 0;
 int nr_generators = 0;
 int roof_height;
 
-#define MAX_GENERATORS 4
+
 
 typedef struct field_generator
 {
@@ -38,6 +39,7 @@ void add_smoke_emitter( GLfloat x, GLfloat y, GLfloat z, vec3 look_dir);
 void add_smoke_emitter(GLfloat x, GLfloat y, GLfloat z,vec3);
 void remove_smoke_emitter(int index);
 void roof_interaction(smoke  *s);
+void draw_fans_and_emitters(GLuint program, mat4 cam,Model *fan, Model *emitter);
 
 void interact_vector_field(smoke *s );
 void smoke_interact_vector_field(int t);
