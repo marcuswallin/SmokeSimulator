@@ -99,6 +99,12 @@ void draw_billboard(Model *mod, mat4 mtw, mat4 cam, GLuint billboard_prog)
   glUniform1i(glGetUniformLocation(program_billboard, "tex2"), 4);
 	glActiveTexture(GL_TEXTURE5);
   glUniform1i(glGetUniformLocation(billboard_prog, "tex3"), 5);
+  glActiveTexture(GL_TEXTURE6);
+  glUniform1i(glGetUniformLocation(billboard_prog, "bump1"), 6);
+  glActiveTexture(GL_TEXTURE7);
+  glUniform1i(glGetUniformLocation(billboard_prog, "bump2"), 7);
+  glActiveTexture(GL_TEXTURE8);
+  glUniform1i(glGetUniformLocation(billboard_prog, "bump3"), 8);
 	glUniformMatrix4fv(glGetUniformLocation(billboard_prog, "camMatrix"), 1, GL_TRUE, cam.m);
 	glUniformMatrix4fv(glGetUniformLocation(billboard_prog, "mtwMatrix"), 1, GL_TRUE, mtw.m);
 	DrawModelInstanced(mod, billboard_prog, "inPosition", NULL, "inTexCoord", nr_particles);

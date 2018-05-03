@@ -3,10 +3,13 @@
 in vec3 inPosition;
 in vec2 inTexCoord;
 
+out vec2 texCoord;
+out vec3 exSurface;
+
 uniform sampler2D smokePos;
 
 out float age;
-out vec2 texCoord;
+
 out float tex_choice;
 
 uniform int nrParticles;
@@ -41,5 +44,7 @@ void main(void)
 
   age = texVal.w;
 	texCoord = inTexCoord;
+  //for light
+  exSurface = (tot * vec4(inPosition, 1.0)).xyz;
 
 }

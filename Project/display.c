@@ -22,7 +22,8 @@ void lightToShader(GLuint program);
 
 
 GLuint program_room, program_billboard, program_generators;
-TextureData wall_tex, floor_tex, roof_tex, smoke_tex_1, smoke_tex_2, smoke_tex_3;
+TextureData wall_tex, floor_tex, roof_tex, smoke_tex_1, smoke_tex_2,
+    smoke_tex_3, bump_tex_1, bump_tex_2, bump_tex_3;
 Model *room_model, *floor_model, *roof_model, *billboard_model, *fan_model, *emitter_model;
 void draw_room_model(Model *mod, mat4 mtw, mat4 cam, GLfloat trans);
 
@@ -54,6 +55,7 @@ void init(void)
   initLamp(projectionMatrix);
 	lightToShader(program_room);
 	lightToShader(program_generators);
+	lightToShader(program_billboard);
 
 	//SMOKE
 	glUseProgram(program_billboard);
@@ -74,6 +76,13 @@ void init(void)
 	LoadTGATexture("objects/smoke_texture_2.tga", &smoke_tex_2);
 	glActiveTexture(GL_TEXTURE5);
 	LoadTGATexture("objects/smoke_texture_3.tga", &smoke_tex_3);
+	glActiveTexture(GL_TEXTURE6);
+	LoadTGATexture("objects/texture_1_normal.tga", &bump_tex_1);
+	glActiveTexture(GL_TEXTURE7);
+	LoadTGATexture("objects/texture_2_normal.tga", &bump_tex_2);
+	glActiveTexture(GL_TEXTURE8);
+	LoadTGATexture("objects/texture_3_normal.tga", &bump_tex_3);
+
 
 	room_model = LoadModelPlus("objects/cube_tc.obj");
 	floor_model = LoadModelPlus("objects/floor.obj");
@@ -114,21 +123,22 @@ void display(void)
 	glUniform1i(glGetUniformLocation(program_room, "tex"), 2);
 	draw_room_model(roof_model, mtw_matrix, cam_matrix, -0.1);
 
-  //draw fan models-------------------------------------------
-	update_light_sources(program_generators);
-	glUniformMatrix4fv(glGetUniformLocation(program_generators, "camMatrix"), 1, GL_TRUE, cam_matrix.m);
-  draw_fans_and_emitters(program_room, cam_matrix, fan_model, emitter_model);
 
 	//DRAW SMOKE---------------------------------------------
 
 	glDisable(GL_DEPTH_TEST);
 	glUseProgram(program_billboard);
+	update_light_sources(program_billboard);
 	spawn_smoke();
 	smoke_interact_vector_field(t);
 	send_smoke_to_GPU(VectorSub(SetVector(0,0,0), look_dir));
 	draw_billboard(billboard_model, mtw_matrix, cam_matrix, program_billboard);
   glEnable(GL_DEPTH_TEST);
 
+	//draw fan models-------------------------------------------
+	update_light_sources(program_generators);
+	glUniformMatrix4fv(glGetUniformLocation(program_generators, "camMatrix"), 1, GL_TRUE, cam_matrix.m);
+  draw_fans_and_emitters(program_room, cam_matrix, fan_model, emitter_model);
 
 
 	t++;

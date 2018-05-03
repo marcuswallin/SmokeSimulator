@@ -28,7 +28,7 @@ void init_smoke_emitters(int scaling_up)
   for(int i = 0; i < nr ; ++i)
   {
     add_smoke_emitter(-20 + 15*i, -scaling_up + 0.1 * scaling_up ,-20,
-       ScalarMult(SetVector(0,1,0), 0.2));
+       ScalarMult(SetVector(0,1,0), 0.15));
   }
 
 }
@@ -45,7 +45,7 @@ void spawn_smoke(void)
       float start_x = (float) r_num / RAND_MAX - 0.5;
       float start_y = (float) rand() / RAND_MAX - 0.5;
       vec3 e = smoke_emitters[i].pos;
-      vec3 init_vel = ScalarMult(smoke_emitters[i].dir, 0.2);
+      vec3 init_vel = ScalarMult(smoke_emitters[i].dir, 0.15);
       add_particle(e.x+start_x*2, e.y+start_y*2, e.z, init_vel);
     }
   }

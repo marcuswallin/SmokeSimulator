@@ -8,8 +8,8 @@
 #define GROWTH_FACTOR 100
 #define MAX_AGE 8.0
 #define FRICTION 0.98
-#define Y_VELOCITY 0.002
-#define FIELD_STRENGTH 0.05
+#define Y_VELOCITY 0.0015
+#define FIELD_STRENGTH 0.01
 #define SPREAD 0.002
 int nr_emitters = 0;
 int nr_generators = 0;
