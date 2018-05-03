@@ -21,7 +21,7 @@ mat4 projectionMatrix;
 void lightToShader(GLuint program);
 
 
-GLuint program_room, program_billboard;
+GLuint program_room, program_billboard, program_generators;
 TextureData wall_tex, floor_tex, roof_tex, smoke_tex_1, smoke_tex_2, smoke_tex_3;
 Model *room_model, *floor_model, *roof_model, *billboard_model, *fan_model, *emitter_model;
 void draw_room_model(Model *mod, mat4 mtw, mat4 cam, GLfloat trans);
@@ -34,6 +34,7 @@ int scaling_room_up = 15;
 
 void init(void)
 {
+	printf("%f\n", acos(-1));
 
 	glClearColor(0.2,0.2,0.5,0);
 	glEnable(GL_DEPTH_TEST);
@@ -41,32 +42,24 @@ void init(void)
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//	glCullFace(GL_BACK);
 
 	initControls(scaling_room_side, scaling_room_up);
 	cameraPlacement();
 
-
-//	glEnable(GL_BLEND);
-//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//	glCullFace(GL_BACK);
   projectionMatrix = frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 200.0);
 
-
-
-
-
 	program_room = loadShaders("wall.vert", "wall.frag");
+	program_generators = loadShaders("generators.vert", "generators.frag");
 	program_billboard = loadShaders("smoke.vert", "smoke.frag");
   initLamp(projectionMatrix);
 	lightToShader(program_room);
+	lightToShader(program_generators);
 
 	//SMOKE
 	glUseProgram(program_billboard);
 	glUniformMatrix4fv(glGetUniformLocation(program_billboard, "projMatrix"), 1, GL_TRUE, projectionMatrix.m);
 	init_smoke();
 	init_smoke_emitters(scaling_room_up);
-
 
 	//TEXTURES
 	glActiveTexture(GL_TEXTURE0);
@@ -88,13 +81,10 @@ void init(void)
 	billboard_model = LoadModelPlus("objects/billboard.obj");
 	fan_model = LoadModelPlus("objects/bunnyplus.obj");
 	emitter_model =  LoadModelPlus("objects/octagon.obj");
-
-
 }
 
 
 int t = 0;
-
 
 void display(void)
 {
@@ -105,11 +95,12 @@ void display(void)
 	mtw_matrix = IdentityMatrix();
 
 
-	//DRAW LAMP STUFF----------------------------------------------
-
-
-	//draw_lamp_with_cord(program_room, mtw_matrix, cam_matrix, -28, 5, -28);
-	draw_all_lamps(program_room, mtw_matrix, cam_matrix);
+	vec3 look_dir = get_look_dir();
+	vec3 view_pos = get_view_pos();
+  keyboard_interaction(view_pos,look_dir);
+	//DRAW LAMPS----------------------------------------------
+  update_light_sources(program_lamp);
+	draw_all_lamps(program_generators, mtw_matrix, cam_matrix);
 
 	//DRAW ROOM----------------------------------------------
 
@@ -123,15 +114,16 @@ void display(void)
 	glUniform1i(glGetUniformLocation(program_room, "tex"), 2);
 	draw_room_model(roof_model, mtw_matrix, cam_matrix, -0.1);
 
-	//-------------------------------------------------------
+  //draw fan models-------------------------------------------
+	update_light_sources(program_generators);
+	glUniformMatrix4fv(glGetUniformLocation(program_generators, "camMatrix"), 1, GL_TRUE, cam_matrix.m);
+  draw_fans_and_emitters(program_room, cam_matrix, fan_model, emitter_model);
 
 	//DRAW SMOKE---------------------------------------------
+
 	glDisable(GL_DEPTH_TEST);
 	glUseProgram(program_billboard);
-  vec3 look_dir = get_look_dir();
-	vec3 view_pos = get_view_pos();
 	spawn_smoke();
-	keyboard_interaction(view_pos,look_dir);
 	smoke_interact_vector_field(t);
 	send_smoke_to_GPU(VectorSub(SetVector(0,0,0), look_dir));
 	draw_billboard(billboard_model, mtw_matrix, cam_matrix, program_billboard);
@@ -149,7 +141,7 @@ void draw_room_model(Model *mod, mat4 mtw, mat4 cam, GLfloat trans)
 	mtw = Mult(mtw, T(0,trans,0));
 	mat4 tot = Mult(cam, mtw);
 	glUniformMatrix4fv(glGetUniformLocation(program_room, "mdlMatrix"), 1, GL_TRUE, tot.m);
-
+  glUniformMatrix4fv(glGetUniformLocation(program_room, "camMatrix"), 1, GL_TRUE, cam.m);
 	DrawModel(mod, program_room, "inPosition", "inNormal", "inTexCoord");
 }
 

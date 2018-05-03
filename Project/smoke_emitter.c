@@ -51,6 +51,35 @@ void spawn_smoke(void)
   }
 }
 
+void draw_fans_and_emitters(GLuint program, mat4 cam_mat, Model *fan, Model *emitter)
+{
+  mat4 rot;
+  mat4 tot;
+  field_generator curr;
+  GLint loc = glGetUniformLocation(program, "mdlMatrix");
+
+  for(int i = 0; i < nr_generators; ++i)
+  {
+     curr = generators[i];
+     rot = RotateToAxis(curr.dir);
+
+     tot = Mult(cam_mat, Mult(T(curr.pos.x, curr.pos.y, curr.pos.z), rot));
+     glUniformMatrix4fv(loc, 1, GL_TRUE, tot.m);
+     DrawModel(fan, program, "inPosition", "inNormal", "inTexCoord");
+  }
+
+  for(int t = 0; t < nr_emitters; ++t)
+  {
+    curr = smoke_emitters[t];
+    rot = RotateToAxis(curr.dir);
+    tot = Mult(cam_mat, Mult(T(curr.pos.x, curr.pos.y, curr.pos.z), rot));
+    glUniformMatrix4fv(loc, 1, GL_TRUE, tot.m);
+    DrawModel(fan, program, "inPosition", "inNormal", "inTexCoord");
+  }
+
+}
+
+
 void smoke_interact_vector_field(int t)
 {
   for(int i = 0; i < nr_particles; ++i)
@@ -225,6 +254,7 @@ void add_field_generator(GLfloat x, GLfloat y, GLfloat z, vec3 look_dir)
     return;
 
   generators[nr_generators].pos = SetVector(x,y,z);
+  generators[nr_generators].dir = look_dir;
   generators[nr_generators].T = get_trans_matrix(look_dir);
   generators[nr_generators].inverseT = InvertMat3(generators[nr_generators].T);
   printf("%f %f %f \n", generators[nr_generators].pos.x, generators[nr_generators].pos.y, generators[nr_generators].pos.z);

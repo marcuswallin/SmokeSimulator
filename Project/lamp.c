@@ -80,12 +80,7 @@ void draw_cord_model(Model *mod, mat4 mtw, mat4 cam, GLfloat x_trans, GLfloat y_
 
 void draw_lamp_with_cord(GLuint program, mat4 mtw, mat4 cam, GLfloat x, GLfloat y, GLfloat z)
 {
-  glUseProgram(program);
 
-  glUniform3fv(glGetUniformLocation(program, "lightSourcesDirPosArr"),
-	4, &lightSourcesDirectionsPositions[0].x);
-  glUniform1iv(glGetUniformLocation(program, "isAlive"),
-	4, isAlive);
 
 	//DRAW LAMP------------------------------------------------
 	glUseProgram(program_lamp);
@@ -97,6 +92,17 @@ void draw_lamp_with_cord(GLuint program, mat4 mtw, mat4 cam, GLfloat x, GLfloat 
 	mtw = S(1.5,1.5,1.5);
 
 	draw_cord_model(cord_model,mtw, cam, x, y+7, z);
+
+}
+
+void update_light_sources(GLuint program)
+{
+  glUseProgram(program);
+
+  glUniform3fv(glGetUniformLocation(program, "lightSourcesDirPosArr"),
+  4, &lightSourcesDirectionsPositions[0].x);
+  glUniform1iv(glGetUniformLocation(program, "isAlive"),
+  4, isAlive);
 
 }
 
