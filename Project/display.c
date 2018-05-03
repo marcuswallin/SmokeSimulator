@@ -10,30 +10,23 @@
 #include "LoadTGA.h"
 #include "cameracontrol.c"
 #include "smoke.c"
+
 #include "smoke_emitter.c"
+
+#include "lamp.c"
 
 
 
 mat4 projectionMatrix;
 void lightToShader(GLuint program);
 
-Point3D lightSourcesColorsArr[] = { {1.0f, 1.0f, 1.0f},
-{0.0f, 1.0f, 0.0f},
-{1.0f, 1.0f, 1.0f},
-{1.0f, 1.0f, 1.0f} };
-
-GLint isDirectional[] = {0,0,1,1};
-
-Point3D lightSourcesDirectionsPositions[] = { {0.0f, 9.0f, 0.0f},
-{8.0f, 20.0f, 40.0f},
-{-1.0f, 1.0f, 0.0f},
-{0.0f, 1.0f, 1.0f} };
 
 GLuint program_room, program_billboard;
 TextureData wall_tex, floor_tex, roof_tex, smoke_tex_1, smoke_tex_2, smoke_tex_3;
-Model *room_model, *floor_model, *roof_model, *billboard_model;
+Model *room_model, *floor_model, *roof_model, *billboard_model, *fan_model, *emitter_model;
 void draw_room_model(Model *mod, mat4 mtw, mat4 cam, GLfloat trans);
-void draw_billboard(Model *mod, mat4 mtw, mat4 cam);
+
+void keyboard_interaction(vec3 pos, vec3 look_dir);
 
 int scaling_room_side = 75;
 int scaling_room_up = 15;
@@ -45,6 +38,7 @@ void init(void)
 	glClearColor(0.2,0.2,0.5,0);
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//	glCullFace(GL_BACK);
@@ -52,10 +46,19 @@ void init(void)
 	initControls(scaling_room_side, scaling_room_up);
 	cameraPlacement();
 
-	projectionMatrix = frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 200.0);
+
+//	glEnable(GL_BLEND);
+//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//	glCullFace(GL_BACK);
+  projectionMatrix = frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 200.0);
+
+
+
+
+
 	program_room = loadShaders("wall.vert", "wall.frag");
 	program_billboard = loadShaders("smoke.vert", "smoke.frag");
-
+  initLamp(projectionMatrix);
 	lightToShader(program_room);
 
 	//SMOKE
@@ -83,11 +86,15 @@ void init(void)
 	floor_model = LoadModelPlus("objects/floor.obj");
 	roof_model = LoadModelPlus("objects/roof.obj");
 	billboard_model = LoadModelPlus("objects/billboard.obj");
+	fan_model = LoadModelPlus("objects/bunnyplus.obj");
+	emitter_model =  LoadModelPlus("objects/octagon.obj");
+
 
 }
 
 
 int t = 0;
+
 
 void display(void)
 {
@@ -96,6 +103,13 @@ void display(void)
 	mat4 mtw_matrix, cam_matrix;
 	cam_matrix = cameraPlacement();
 	mtw_matrix = IdentityMatrix();
+
+
+	//DRAW LAMP STUFF----------------------------------------------
+
+
+	//draw_lamp_with_cord(program_room, mtw_matrix, cam_matrix, -28, 5, -28);
+	draw_all_lamps(program_room, mtw_matrix, cam_matrix);
 
 	//DRAW ROOM----------------------------------------------
 
@@ -120,16 +134,13 @@ void display(void)
 	keyboard_interaction(view_pos,look_dir);
 	smoke_interact_vector_field(t);
 	send_smoke_to_GPU(VectorSub(SetVector(0,0,0), look_dir));
-	draw_billboard(billboard_model, mtw_matrix, cam_matrix);
+	draw_billboard(billboard_model, mtw_matrix, cam_matrix, program_billboard);
   glEnable(GL_DEPTH_TEST);
 
 
 
 	t++;
-//	if(t%10 == 0 && nr_generators > 0){
-	//vec3 post = get_coord_new_system(view_pos, 0);
-	//printf("%f %f \n", sqrt(pow(post.x,2) + pow(post.y,2)), post.z);
-//}
+
 	glutSwapBuffers();
 }
 
@@ -143,30 +154,66 @@ void draw_room_model(Model *mod, mat4 mtw, mat4 cam, GLfloat trans)
 }
 
 
-void draw_billboard(Model *mod, mat4 mtw, mat4 cam)
-{
-	glActiveTexture(GL_TEXTURE3);
-  glUniform1i(glGetUniformLocation(program_billboard, "tex1"), 3);
-	glActiveTexture(GL_TEXTURE4);
-  glUniform1i(glGetUniformLocation(program_billboard, "tex2"), 4);
-	glActiveTexture(GL_TEXTURE5);
-  glUniform1i(glGetUniformLocation(program_billboard, "tex3"), 5);
-	glUniformMatrix4fv(glGetUniformLocation(program_billboard, "camMatrix"), 1, GL_TRUE, cam.m);
-	glUniformMatrix4fv(glGetUniformLocation(program_billboard, "mtwMatrix"), 1, GL_TRUE, mtw.m);
-	DrawModelInstanced(mod, program_billboard, "inPosition", NULL, "inTexCoord", nr_particles);
-}
-
-
 void lightToShader(GLuint program)
 {
 	glUseProgram(program);
 	glUniformMatrix4fv(glGetUniformLocation(program, "projMatrix"), 1, GL_TRUE, projectionMatrix.m);
 
-	glUniform3fv(glGetUniformLocation(program, "lightSourcesDirPosArr"),
-	4, &lightSourcesDirectionsPositions[0].x);
+	//glUniform3fv(glGetUniformLocation(program, "lightSourcesDirPosArr"),
+	//4, &lightSourcesDirectionsPositions[0].x);
 	glUniform3fv(glGetUniformLocation(program, "lightSourcesColorArr"),
 	4, &lightSourcesColorsArr[0].x);
-	glUniform1iv(glGetUniformLocation(program, "isDirectional"),
-	4, isDirectional);
+	//glUniform1iv(glGetUniformLocation(program, "isDirectional"),
+	//4, isDirectional);
+
+}
+
+
+bool e_down = false;
+bool r_down = false;
+bool g_down = false;
+bool key_q_is_down = false;
+void keyboard_interaction(vec3 pos, vec3 look_dir)
+{
+	if(glutKeyIsDown('q') && !key_q_is_down && (current_lamp_index < 4))
+	{
+ 		key_q_is_down = true;
+ 		add_lamp(get_view_pos().x,5,get_view_pos().z);
+ 	}
+	else if(!glutKeyIsDown('q') && key_q_is_down)
+ 	{
+ 		key_q_is_down = false;
+ 	}
+ 	if(glutKeyIsDown('t'))
+	{
+ 		clear_lamps(program_room);
+	 }
+
+  if(glutKeyIsDown('e') && !e_down)
+  {
+    e_down = true;
+    add_smoke_emitter(pos.x, pos.y, pos.z, look_dir);
+  //  add_smoke_emitter(pos.x,-roof_height + 0.1 * roof_height,pos.z);
+  }
+  else if(!glutKeyIsDown('e') && e_down)
+    e_down = false;
+
+
+  if(glutKeyIsDown('r') && nr_emitters > 0 && !r_down)
+  {
+    r_down = true;
+    remove_smoke_emitter(0);
+  }
+  else if(!glutKeyIsDown('r') && r_down)
+    r_down = false;
+
+
+  if(glutKeyIsDown('g') && !g_down)
+  {
+    g_down = true;
+    add_field_generator(pos.x,pos.y,pos.z, look_dir);
+  }
+  else if(!glutKeyIsDown('g') && g_down)
+    g_down = false;
 
 }

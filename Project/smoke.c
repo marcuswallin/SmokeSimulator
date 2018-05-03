@@ -91,6 +91,19 @@ void remove_particle(int index)
 }
 
 
+void draw_billboard(Model *mod, mat4 mtw, mat4 cam, GLuint billboard_prog)
+{
+	glActiveTexture(GL_TEXTURE3);
+  glUniform1i(glGetUniformLocation(program_billboard, "tex1"), 3);
+	glActiveTexture(GL_TEXTURE4);
+  glUniform1i(glGetUniformLocation(program_billboard, "tex2"), 4);
+	glActiveTexture(GL_TEXTURE5);
+  glUniform1i(glGetUniformLocation(billboard_prog, "tex3"), 5);
+	glUniformMatrix4fv(glGetUniformLocation(billboard_prog, "camMatrix"), 1, GL_TRUE, cam.m);
+	glUniformMatrix4fv(glGetUniformLocation(billboard_prog, "mtwMatrix"), 1, GL_TRUE, mtw.m);
+	DrawModelInstanced(mod, billboard_prog, "inPosition", NULL, "inTexCoord", nr_particles);
+}
+
 
 //sorts the smoke array according to siew-plane coordinates!
 //look dir should be the direction we want to sort in. Can be minus

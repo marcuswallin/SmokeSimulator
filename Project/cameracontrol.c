@@ -101,6 +101,7 @@ vec3 get_view_pos(void)
   return MultVec3(trans, p);
 }
 
+
 vec3 get_look_dir(void)
 {
   vec3 tmp_l = MultVec3(Mult(trans, Mult( T(p.x, p.y, p.z),

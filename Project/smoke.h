@@ -20,6 +20,7 @@ smoke *smoke_array;
 void add_particle(GLfloat x, GLfloat y, GLfloat z, vec3 init_vel);
 void remove_particle(int index);
 void init_smoke(void);
+void draw_billboard(Model *mod, mat4 mtw, mat4 cam, GLuint billboard_prog);
 
 int partition( smoke a[], int l, int r, vec3 look_vec);
 void quick_sort( smoke a[], int l, int r, vec3 look_vec);

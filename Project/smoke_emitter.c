@@ -34,40 +34,6 @@ void init_smoke_emitters(int scaling_up)
 }
 
 
-bool e_down = false;
-bool r_down = false;
-bool g_down = false;
-void keyboard_interaction(vec3 pos, vec3 look_dir)
-{
-  if(glutKeyIsDown('e') && !e_down)
-  {
-    e_down = true;
-    add_smoke_emitter(pos.x, pos.y, pos.z, look_dir);
-  //  add_smoke_emitter(pos.x,-roof_height + 0.1 * roof_height,pos.z);
-  }
-  else if(!glutKeyIsDown('e') && e_down)
-    e_down = false;
-
-
-  if(glutKeyIsDown('r') && nr_emitters > 0 && !r_down)
-  {
-    r_down = true;
-  //  remove_smoke_emitter(0);
-  }
-  else if(!glutKeyIsDown('r') && r_down)
-    r_down = false;
-
-
-  if(glutKeyIsDown('g') && !g_down)
-  {
-    g_down = true;
-    add_field_generator(pos.x,pos.y,pos.z, look_dir);
-  }
-  else if(!glutKeyIsDown('g') && g_down)
-    g_down = false;
-
-}
-
 
 void spawn_smoke(void)
 {
@@ -193,7 +159,7 @@ void add_smoke_emitter( GLfloat x, GLfloat y, GLfloat z, vec3 look_dir)
   ++nr_emitters;
 
 }
-/*
+
 //removes a particle at the designated index
 //moves all objects in the list down one step.
 void remove_smoke_emitter(int index)
@@ -208,7 +174,7 @@ void remove_smoke_emitter(int index)
 
   --nr_emitters;
 }
-*/
+
 
 //GENERATORS------------------------------------------------------------------------------
 //input must be normalized
