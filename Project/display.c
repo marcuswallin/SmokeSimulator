@@ -99,7 +99,7 @@ void display(void)
 	vec3 view_pos = get_view_pos();
   keyboard_interaction(view_pos,look_dir);
 	//DRAW LAMPS----------------------------------------------
-  update_light_sources(program_lamp);
+  update_light_sources(program_room);
 	draw_all_lamps(program_generators, mtw_matrix, cam_matrix);
 
 	//DRAW ROOM----------------------------------------------

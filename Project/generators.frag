@@ -16,17 +16,18 @@ void main(void)
 {
   float diffuse, specular, shade;
   vec3 color = vec3(0);
-  vec3 v = normalize(- exSurface);
+  vec3 v = normalize( -exSurface);
   vec3 r;
   for (int i = 0; i < 4; i++)
     {
-
+      if(!isAlive[i])
+        continue;
       vec3 light = lightSourcesDirPosArr[i];
       vec3 lightView;
   		lightView = vec3(camMatrix* vec4(light, 1.0));
 
 
-      diffuse = dot(normalize(exNormal), normalize( lightView - exSurface  ));
+      diffuse = dot(normalize(exNormal), normalize( exSurface - lightView  ));
       diffuse = clamp(diffuse, 0, 1);
 
       r = normalize(reflect( exSurface - lightView, normalize(exNormal)));
@@ -38,19 +39,9 @@ void main(void)
 		      specular = 1.0 * pow(specular, 50.0);
       }
 
-		      specular = clamp(specular, 0, 1);
-
-		      //shade =  diffuse + specular;
-
-          if(isAlive[i])
-          {
-  	         shade =  diffuse + specular;}
-
-          else
-          {
-              shade =  0;}
-
-		      color = color + (vec3(shade) * lightSourcesColorArr[i]);
+  		specular = clamp(specular, 0, 1);
+  	  shade =  diffuse + specular;
+      color = color + (vec3(shade) * lightSourcesColorArr[i]);
      }
    outColor = vec4(color, 1.0) * texture(tex, texCoord);
 
