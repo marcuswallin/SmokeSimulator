@@ -376,6 +376,7 @@ char transposed = 0;
 		return m;
 	}
 
+
 	// Ej testad!
 	mat3 MultMat3(mat3 a, mat3 b) // m = a * b
 	{
@@ -462,6 +463,23 @@ char transposed = 0;
 		return r;
 	}
 
+
+mat4 RotateToAxis(vec3 dir)
+{
+  GLfloat theta = acos(dir.z);
+  if(dir.x < 0)
+  {
+    theta = -theta;
+  }
+  mat4 rot = Ry(theta);
+  vec3 a = MultVec3(rot, SetVector(0,0,1));
+  GLfloat phi = acos(DotProduct(a, dir));
+
+  vec3 rotation_vec = Normalize(CrossProduct(a, dir));
+  rot = Mult(ArbRotate(rotation_vec, phi), rot);
+  //printf("%f %f %f\n",a.x, a.y, a.z);
+  return rot;
+}
 
 // Unnecessary
 // Will probably be removed
