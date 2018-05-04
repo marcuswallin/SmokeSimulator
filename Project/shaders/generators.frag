@@ -15,10 +15,11 @@ in vec3 exNormal;
 void main(void)
 {
   float diffuse, specular, shade;
-  vec3 color = vec3(0);
+  vec3 tot_shade = vec3(0);
+  vec4 color = vec4(0.5,0.5,0.5, 1.0);
   vec3 v = normalize( -exSurface);
   vec3 r;
-  for (int i = 0; i < 4; i++)
+  for (int i = 0; i < 6; i++)
     {
       if(!isAlive[i])
         continue;
@@ -39,11 +40,13 @@ void main(void)
 		      specular = 1.0 * pow(specular, 50.0);
       }
 
+      float energy = 150 / pow((1 + length( lightView - exSurface)), 2);
+      float intensity = clamp(energy, 0 ,1);
   		specular = clamp(specular, 0, 1);
   	  shade =  diffuse + specular;
-      color = color + (vec3(shade) * lightSourcesColorArr[i]);
+      tot_shade += intensity * (vec3(shade) * lightSourcesColorArr[i]);
      }
-   outColor = vec4(color, 1.0) * texture(tex, texCoord);
+   outColor = vec4(tot_shade, 1.0) * color;//texture(tex, texCoord);
 
 
 

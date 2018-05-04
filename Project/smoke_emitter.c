@@ -28,7 +28,7 @@ void init_smoke_emitters(int scaling_up)
   for(int i = 0; i < nr ; ++i)
   {
     add_smoke_emitter(-20 + 15*i, -scaling_up + 0.1 * scaling_up ,-20,
-       ScalarMult(SetVector(0,1,0), 0.15));
+       ScalarMult(SetVector(0,1,0), INIT_VEL));
   }
 
 }
@@ -45,7 +45,7 @@ void spawn_smoke(void)
       float start_x = (float) r_num / RAND_MAX - 0.5;
       float start_y = (float) rand() / RAND_MAX - 0.5;
       vec3 e = smoke_emitters[i].pos;
-      vec3 init_vel = ScalarMult(smoke_emitters[i].dir, 0.15);
+      vec3 init_vel = ScalarMult(smoke_emitters[i].dir, INIT_VEL);
       add_particle(e.x+start_x*2, e.y+start_y*2, e.z, init_vel);
     }
   }
@@ -74,7 +74,7 @@ void draw_fans_and_emitters(GLuint program, mat4 cam_mat, Model *fan, Model *emi
     rot = RotateToAxis(curr.dir);
     tot = Mult(cam_mat, Mult(T(curr.pos.x, curr.pos.y, curr.pos.z), rot));
     glUniformMatrix4fv(loc, 1, GL_TRUE, tot.m);
-    DrawModel(fan, program, "inPosition", "inNormal", "inTexCoord");
+    DrawModel(emitter, program, "inPosition", "inNormal", "inTexCoord");
   }
 
 }
@@ -181,7 +181,9 @@ void add_smoke_emitter( GLfloat x, GLfloat y, GLfloat z, vec3 look_dir)
     return;
 
   smoke_emitters[nr_emitters].pos = SetVector(x,y,z);
-  smoke_emitters[nr_emitters].dir = look_dir;
+  vec3 rot_axis = CrossProduct(look_dir, SetVector(0,1,0));
+  mat4 rot_mat = ArbRotate(rot_axis, 3.1415/2);
+  smoke_emitters[nr_emitters].dir = Normalize(MultVec3(rot_mat,look_dir));
   smoke_emitters[nr_emitters].T = get_trans_matrix(look_dir);
   smoke_emitters[nr_emitters].inverseT = InvertMat3(smoke_emitters[nr_emitters].T);
   printf("%f %f %f \n", smoke_emitters[nr_emitters].pos.x, smoke_emitters[nr_emitters].pos.y, smoke_emitters[nr_emitters].pos.z);

@@ -47,7 +47,7 @@ void init(void)
 	initControls(scaling_room_side, scaling_room_up);
 	cameraPlacement();
 
-  projectionMatrix = frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 200.0);
+  projectionMatrix = frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 250.0);
 
 	program_room = loadShaders("shaders/wall.vert", "shaders/wall.frag");
 	program_generators = loadShaders("shaders/generators.vert", "shaders/generators.frag");
@@ -88,8 +88,8 @@ void init(void)
 	floor_model = LoadModelPlus("objects/floor.obj");
 	roof_model = LoadModelPlus("objects/roof.obj");
 	billboard_model = LoadModelPlus("objects/billboard.obj");
-	fan_model = LoadModelPlus("objects/bunnyplus.obj");
-	emitter_model =  LoadModelPlus("objects/octagon.obj");
+	fan_model = LoadModelPlus("objects/force_generator.obj");
+	emitter_model =  LoadModelPlus("objects/smoke_emitter.obj");
 }
 
 
@@ -107,9 +107,6 @@ void display(void)
 	vec3 look_dir = get_look_dir();
 	vec3 view_pos = get_view_pos();
   keyboard_interaction(view_pos,look_dir);
-	//DRAW LAMPS----------------------------------------------
-  update_light_sources(program_room);
-	draw_all_lamps(program_generators, mtw_matrix, cam_matrix);
 
 	//DRAW ROOM----------------------------------------------
 
@@ -140,6 +137,9 @@ void display(void)
 	glUniformMatrix4fv(glGetUniformLocation(program_generators, "camMatrix"), 1, GL_TRUE, cam_matrix.m);
   draw_fans_and_emitters(program_room, cam_matrix, fan_model, emitter_model);
 
+  //DRAW LAMPS----------------------------------------------
+  update_light_sources(program_room);
+  draw_all_lamps(program_generators, mtw_matrix, cam_matrix);
 
 	t++;
 
@@ -164,7 +164,7 @@ void lightToShader(GLuint program)
 	//glUniform3fv(glGetUniformLocation(program, "lightSourcesDirPosArr"),
 	//4, &lightSourcesDirectionsPositions[0].x);
 	glUniform3fv(glGetUniformLocation(program, "lightSourcesColorArr"),
-	4, &lightSourcesColorsArr[0].x);
+	6, &lightSourcesColorsArr[0].x);
 	//glUniform1iv(glGetUniformLocation(program, "isDirectional"),
 	//4, isDirectional);
 
@@ -174,22 +174,22 @@ void lightToShader(GLuint program)
 bool e_down = false;
 bool r_down = false;
 bool g_down = false;
-bool key_q_is_down = false;
+bool q_down = false;
 void keyboard_interaction(vec3 pos, vec3 look_dir)
 {
-	if(glutKeyIsDown('q') && !key_q_is_down && (current_lamp_index < 4))
+	if(glutKeyIsDown('q') && !q_down)
 	{
- 		key_q_is_down = true;
- 		add_lamp(get_view_pos().x,5,get_view_pos().z);
+ 		q_down = true;
+ 		add_lamp(pos.x + look_dir.x * 6 ,pos.y + look_dir.y * 6 - 3 , pos.z + look_dir.z * 6);
  	}
-	else if(!glutKeyIsDown('q') && key_q_is_down)
+	else if(!glutKeyIsDown('q') && q_down)
  	{
- 		key_q_is_down = false;
+ 		q_down = false;
  	}
  	if(glutKeyIsDown('t'))
 	{
  		clear_lamps(program_room);
-	 }
+	}
 
   if(glutKeyIsDown('e') && !e_down)
   {

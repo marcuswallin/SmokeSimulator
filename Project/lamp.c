@@ -23,18 +23,22 @@ void clear_lamps(GLuint program);
 void draw_all_lamps(GLuint program, mat4 mtw, mat4 cam);
 
 Point3D lightSourcesColorsArr[] = {
-{1.0f,0.95f,0.6f},
-{1.0f,0.95f,0.6f},
-{1.0f,0.95f,0.6f},
-{1.0f,0.95f,0.6f}
+{0.95f,0.95f,0.7f},
+{0.95f,0.95f,0.7f},
+{0.95f,0.95f,0.7f},
+{0.95f,0.95f,0.7f},
+{0.95f,0.95f,0.7f},
+{0.95f,0.95f,0.7f}
 
 };
 
-GLint isAlive[] = {0, 0, 0, 0};
+GLint isAlive[] = {0, 0, 0, 0, 0, 0};
 
 
 Point3D lightSourcesDirectionsPositions[] = {
 {0.0f, 5.0f, 0.0f},
+{100.0f, 100.0f,100.0f},
+{100.0f, 100.0f,100.0f},
 {100.0f, 100.0f,100.0f},
 {100.0f, 100.0f,100.0f},
 {100.0f, 100.0f,100.0f}
@@ -89,9 +93,9 @@ void draw_lamp_with_cord(GLuint program, mat4 mtw, mat4 cam, GLfloat x, GLfloat 
 
 	//DRAW CORD------------------------------------------------
 	glUseProgram(program_cord);
-	mtw = S(1.5,1.5,1.5);
+	mtw = S(5,4,5);
 
-	draw_cord_model(cord_model,mtw, cam, x, y+7, z);
+	draw_cord_model(cord_model,mtw, cam, x, y+20, z);
 
 }
 
@@ -100,15 +104,15 @@ void update_light_sources(GLuint program)
   glUseProgram(program);
 
   glUniform3fv(glGetUniformLocation(program, "lightSourcesDirPosArr"),
-  4, &lightSourcesDirectionsPositions[0].x);
+  6, &lightSourcesDirectionsPositions[0].x);
   glUniform1iv(glGetUniformLocation(program, "isAlive"),
-  4, isAlive);
+  6, isAlive);
 
 }
 
 void draw_all_lamps(GLuint program, mat4 mtw, mat4 cam)
 {
-  for (int i = 0; i < 4; i++)
+  for (int i = 0; i < 6; i++)
   {
     draw_lamp_with_cord(program, mtw, cam,
       lightSourcesDirectionsPositions[i].x,
@@ -119,6 +123,8 @@ void draw_all_lamps(GLuint program, mat4 mtw, mat4 cam)
 
 void add_lamp(GLfloat x, GLfloat y, GLfloat z)
 {
+  if((current_lamp_index >= 6))
+    return;
 
   printf("%i\n", current_lamp_index);
   lightSourcesDirectionsPositions[current_lamp_index].x = x;
@@ -132,12 +138,12 @@ void add_lamp(GLfloat x, GLfloat y, GLfloat z)
 void clear_lamps(GLuint program)
 {
 
-  for(int i = 1; i<4; i++)
+  for(int i = 1; i<6; i++)
   {
     isAlive[i] = 0;
   }
 
-  for(int i = 1; i<4; i++)
+  for(int i = 1; i<6; i++)
   {
     lightSourcesDirectionsPositions[i].x = 100.0f;
     lightSourcesDirectionsPositions[i].y = 100.0f;
@@ -147,6 +153,6 @@ void clear_lamps(GLuint program)
   current_lamp_index = 1;
   glUseProgram(program);
   glUniform1iv(glGetUniformLocation(program, "isAlive"),
-	4, isAlive);
+	6, isAlive);
 
 }

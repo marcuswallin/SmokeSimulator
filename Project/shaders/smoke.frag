@@ -48,19 +48,22 @@ void main(void)
   vec3 color = vec3(0);
   vec3 v = normalize( -exSurface);
   vec3 r;
-  for (int i = 0; i < 4; i++)
+  for (int i = 0; i < 6; i++)
     {
+
       if(!isAlive[i])
         continue;
+
       vec3 light = lightSourcesDirPosArr[i];
       vec3 lightView;
       lightView = vec3(camMatrix* vec4(light, 1.0));
 
-
+      float energy = 150 / pow((1 + length( lightView - exSurface)), 2);
+      float intensity = clamp(energy, 0 ,1);
       diffuse = dot(normalize(exNormal), normalize(  lightView -exSurface   ));
-      shade = clamp(diffuse, 0.2, 1);
+      shade = clamp((diffuse + 1.2)/2, 0, 1);
 
-      color = color + (vec3(shade) * lightSourcesColorArr[i]);
+      color = color + intensity * (vec3(shade) * lightSourcesColorArr[i]);
      }
 
   outColor = vec4(vec3(tex_color)*color, tex_color.w* 1.0/(3*age));
