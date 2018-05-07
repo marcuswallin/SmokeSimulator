@@ -24,7 +24,7 @@ void init_smoke_emitters(int scaling_up)
   srand(time(NULL));
   smoke_emitters = malloc (MAX_EMITTERS * sizeof (field_generator));
 
-  int nr = 1;
+  int nr = 0;
   for(int i = 0; i < nr ; ++i)
   {
     add_smoke_emitter(-20 + 15*i, -scaling_up + 0.1 * scaling_up ,-20,
@@ -183,10 +183,12 @@ void add_smoke_emitter( GLfloat x, GLfloat y, GLfloat z, vec3 look_dir)
   smoke_emitters[nr_emitters].pos = SetVector(x,y,z);
   vec3 rot_axis = CrossProduct(look_dir, SetVector(0,1,0));
   mat4 rot_mat = ArbRotate(rot_axis, 3.1415/2);
-  smoke_emitters[nr_emitters].dir = Normalize(MultVec3(rot_mat,look_dir));
-  smoke_emitters[nr_emitters].T = get_trans_matrix(look_dir);
+  vec3 up_vector =  Normalize(MultVec3(rot_mat,look_dir));
+
+  smoke_emitters[nr_emitters].dir = up_vector;
+  smoke_emitters[nr_emitters].T = get_trans_matrix(up_vector);
   smoke_emitters[nr_emitters].inverseT = InvertMat3(smoke_emitters[nr_emitters].T);
-  printf("%f %f %f \n", smoke_emitters[nr_emitters].pos.x, smoke_emitters[nr_emitters].pos.y, smoke_emitters[nr_emitters].pos.z);
+
   ++nr_emitters;
 
 }

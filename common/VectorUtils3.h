@@ -81,7 +81,7 @@ extern "C" {
 	vec3 CalcNormalVector(vec3 a, vec3 b, vec3 c);
 	void SplitVector(vec3 v, vec3 n, vec3 *vn, vec3 *vp);
 	mat4 reset_rot_billboard(mat4 mtv);
-
+vec3 GetUpVec(vec3 v);
 	mat4 RotateToAxis(vec3 dir);
 
 // Matrix operations primarily on 4x4 matrixes!

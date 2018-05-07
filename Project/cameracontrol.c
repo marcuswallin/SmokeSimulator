@@ -11,21 +11,22 @@
 
 
 vec3 p,l;
-GLfloat old_theta = 0.0f;
+GLfloat old_theta = M_PI;
 GLfloat delta_theta = 0.0f;
-GLfloat old_phi = 0.0f;
+GLfloat old_phi = M_PI /2;
 GLfloat delta_phi = 0.0f;
 int x = 0;
 int y = 0;
 mat4 trans, rot;
 int room_size_roof, room_size_walls;
 
+
 void initControls(int size_walls, int size_roof)
 {
   room_size_roof = size_roof;
   room_size_walls = size_walls;
-  p = SetVector(0.0f,  -5.0f, 20.0f);
-  l = SetVector(0.0f, -5.0f, 0.0f);
+  p = SetVector(0.0f,  0.0f, 1.0f);
+  l = SetVector(0.0f, 0.0f, 0.0f);
   trans = IdentityMatrix();
   glutHideCursor();
 }
@@ -58,26 +59,29 @@ void mouse(int x1,int y1)
 mat4 cameraPlacement()
 {
 
-  p = SetVector(0.0f,  -5.0f, 20.0f);
-  l = SetVector(0.0f, -5.0f, 0.0f);
   vec3 v = SetVector(0.0f, 1.0f, 0.0f);
   v = Normalize(v);
 
   mat4 old_trans = trans;
   glutPassiveMotionFunc(mouse);
   old_theta -= delta_theta;
-  old_phi -= delta_phi;
-  if (fabs((float)old_phi) > 3.1415 / 2)
-    old_phi += delta_phi;
+  old_phi += delta_phi;
+
+  if (old_phi > M_PI || old_phi < 0)
+    old_phi -= delta_phi;
 
   GLfloat f = 0.2;
 
+  float z_val = f*sin(old_phi)*cos(old_theta);
+  float x_val = f*sin(old_phi)*sin(old_theta);
+  float y_val = f*cos(old_phi);
+
   if(glutKeyIsDown('w'))
-    trans = Mult(trans, T(-f*sin(old_theta),f*sin(old_phi),-f*cos(old_theta)));
+    trans = Mult(trans, T(-x_val, y_val,-z_val));
   if(glutKeyIsDown('a'))
     trans = Mult(trans, T(-f*cos(old_theta),0,+f*sin(old_theta)));
   if(glutKeyIsDown('s'))
-    trans = Mult(trans, T(+f*sin(old_theta),-f*sin(old_phi),+f*cos(old_theta)));
+    trans = Mult(trans, T(x_val,-y_val,z_val));
   if(glutKeyIsDown('d'))
     trans = Mult(trans, T(+f*cos(old_theta),0,-f*sin(old_theta)));
 
@@ -88,7 +92,7 @@ mat4 cameraPlacement()
     trans = old_trans;
 
 
-  rot = Mult(Ry(old_theta), Rx(old_phi));
+  rot = Mult(Ry(old_theta), Rx(M_PI /2 - old_phi));
 
   return  lookAtv(MultVec3(trans, p),
   MultVec3(Mult(trans, Mult( T(p.x, p.y, p.z),

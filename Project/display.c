@@ -170,35 +170,70 @@ void lightToShader(GLuint program)
 
 }
 
-
+bool one_down = false;
 bool e_down = false;
-bool r_down = false;
+bool three_down = false;
 bool g_down = false;
 bool q_down = false;
+uint player_mode = 1;
+bool key_is_down = false;
 void keyboard_interaction(vec3 pos, vec3 look_dir)
 {
-	if(glutKeyIsDown('q') && !q_down)
+  vec3 dist = ScalarMult(look_dir, 8);
+  vec3 up_vec = GetUpVec(look_dir);
+
+
+  if(glutKeyIsDown('1') && !one_down)
+  {
+    one_down = true;
+    if(player_mode == 3)
+    {
+      remove_smoke_emitter(nr_emitters-1);
+    }
+    player_mode =1;
+  }
+  else if(!glutKeyIsDown('1') && one_down)
+  {
+    one_down = false;
+  }
+
+  if(glutKeyIsDown('3') &&  !three_down)
+  {
+    player_mode = 3;
+    three_down = true;
+  }
+  else if(!glutKeyIsDown('3') && three_down)
+    three_down = false;
+
+
+  if(player_mode == 3)
+  {
+    remove_smoke_emitter(nr_emitters-1);
+    vec3 d = ScalarMult(up_vec, 3);
+    add_smoke_emitter(pos.x+dist.x-d.x, pos.y +dist.y-d.y, pos.z+dist.z-d.z, look_dir);
+  }
+/*
+	if(glutKeyIsDown('2') && !q_down)
 	{
+    player_mode =2;
  		q_down = true;
  		add_lamp(pos.x + look_dir.x * 6 ,pos.y + look_dir.y * 6 - 3 , pos.z + look_dir.z * 6);
  	}
-	else if(!glutKeyIsDown('q') && q_down)
+	else if(!glutKeyIsDown('2') && q_down)
  	{
  		q_down = false;
- 	}
- 	if(glutKeyIsDown('t'))
+ 	}*/
+/*
+ 	if(glutKeyIsDown('e') && !e_down)
 	{
- 		clear_lamps(program_room);
-	}
-
-  if(glutKeyIsDown('e') && !e_down)
-  {
     e_down = true;
-    add_smoke_emitter(pos.x, pos.y, pos.z, look_dir);
-  //  add_smoke_emitter(pos.x,-roof_height + 0.1 * roof_height,pos.z);
-  }
+    if(player_mode == 2)
+ 		  clear_lamps(program_room);
+    else if(player_mode == 3)
+      remove_smoke_emitter(0);
+	}
   else if(!glutKeyIsDown('e') && e_down)
-    e_down = false;
+
 
 
   if(glutKeyIsDown('r') && nr_emitters > 0 && !r_down)
@@ -216,6 +251,6 @@ void keyboard_interaction(vec3 pos, vec3 look_dir)
     add_field_generator(pos.x,pos.y,pos.z, look_dir);
   }
   else if(!glutKeyIsDown('g') && g_down)
-    g_down = false;
+    g_down = false;*/
 
 }

@@ -58,7 +58,7 @@ void main(void)
       vec3 lightView;
       lightView = vec3(camMatrix* vec4(light, 1.0));
 
-      float energy = 150 / pow((1 + length( lightView - exSurface)), 2);
+      float energy = 150 / (0.6* pow((1 + length( lightView - exSurface)), 2));
       float intensity = clamp(energy, 0 ,1);
       diffuse = dot(normalize(exNormal), normalize(  lightView -exSurface   ));
       shade = clamp((diffuse + 1.2)/2, 0, 1);

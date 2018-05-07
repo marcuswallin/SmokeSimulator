@@ -51,7 +51,7 @@ void main(void)
     {
         shade =  0;
     }
-    float energy = 150 / pow((1 + length( lightView - exSurface)), 2);
+    float energy = 150 / (0.6* pow((1 + length( lightView - exSurface)), 2));
     float intensity = clamp(energy, 0 ,1);
 
     color = color + intensity * (vec3(shade) * lightSourcesColorArr[i]);
