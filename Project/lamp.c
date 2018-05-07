@@ -17,10 +17,11 @@ mat4 projectionMatrix;
 void draw_lamp_model(Model *mod, mat4 mtw, mat4 cam, GLfloat trans_x, GLfloat trans_y, GLfloat trans_z);
 void draw_cord_model(Model *mod, mat4 mtw, mat4 cam, GLfloat trans_x, GLfloat trans_y, GLfloat trans_z);
 void draw_lamp_with_cord(GLuint program, mat4 mtw, mat4 cam, GLfloat x,GLfloat y,GLfloat z);
-void add_lamp(GLfloat x, GLfloat y, GLfloat z);
+void add_lamp(GLfloat x, GLfloat y, GLfloat z, int);
 void initLamp();
 void clear_lamps(GLuint program);
 void draw_all_lamps(GLuint program, mat4 mtw, mat4 cam);
+void remove_lamp(int index);
 
 Point3D lightSourcesColorsArr[] = {
 {0.95f,0.95f,0.7f},
@@ -36,7 +37,7 @@ GLint isAlive[] = {0, 0, 0, 0, 0, 0};
 
 
 Point3D lightSourcesDirectionsPositions[] = {
-{0.0f, 5.0f, 0.0f},
+{100.0f, 100.0f,100.0f},
 {100.0f, 100.0f,100.0f},
 {100.0f, 100.0f,100.0f},
 {100.0f, 100.0f,100.0f},
@@ -60,7 +61,7 @@ void initLamp(mat4 proj_matrix)
   glUseProgram(program_lamp);
 	glUniformMatrix4fv(glGetUniformLocation(program_lamp, "projMatrix"), 1, GL_TRUE, proj_matrix.m);
 
-  add_lamp(0, 5, 0);
+//  add_lamp(0, 5, 0,1);
 
 
 }
@@ -112,27 +113,59 @@ void update_light_sources(GLuint program)
 
 void draw_all_lamps(GLuint program, mat4 mtw, mat4 cam)
 {
-  for (int i = 0; i < 6; i++)
+  for (int i = 0; i < current_lamp_index; i++)
   {
+    if(isAlive[i])
+    {
     draw_lamp_with_cord(program, mtw, cam,
       lightSourcesDirectionsPositions[i].x,
       lightSourcesDirectionsPositions[i].y,
       lightSourcesDirectionsPositions[i].z);
+    }
   }
 }
 
-void add_lamp(GLfloat x, GLfloat y, GLfloat z)
+//need to reset isAlive to zero.
+//is_alive should be either 1 for permantent and 2 for moving
+void add_lamp(GLfloat x, GLfloat y, GLfloat z, int is_alive)
 {
+  printf("%i %i %i %i %i %i\n", isAlive[0],isAlive[1], isAlive[2], isAlive[3], isAlive[4], isAlive[5]);
   if((current_lamp_index >= 6))
     return;
 
-  printf("%i\n", current_lamp_index);
+  //printf("%i\n", current_lamp_index);
   lightSourcesDirectionsPositions[current_lamp_index].x = x;
   lightSourcesDirectionsPositions[current_lamp_index].y = y;
   lightSourcesDirectionsPositions[current_lamp_index].z = z;
-  isAlive[current_lamp_index] = 1;
+  isAlive[current_lamp_index] = is_alive;
   ++current_lamp_index;
 
+}
+
+//these two does not work properly
+void remove_moving_lamp(void)
+{
+  for(int i = 0; i < 6; ++i)
+  {
+    //2 means temporary
+    if(isAlive[i] == 2)
+    {
+     remove_lamp(i);
+    }
+  }
+}
+//same
+void remove_lamp(int index)
+{
+  if (index >= current_lamp_index || index < 0)
+    return;
+
+  for(int j = index; j < current_lamp_index -1 ; ++j)
+  {
+    isAlive[j] = isAlive[j+1];
+    lightSourcesDirectionsPositions[j] = lightSourcesDirectionsPositions[j+1];
+  }
+  --current_lamp_index;
 }
 
 void clear_lamps(GLuint program)

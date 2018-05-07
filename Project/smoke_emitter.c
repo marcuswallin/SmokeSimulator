@@ -28,7 +28,7 @@ void init_smoke_emitters(int scaling_up)
   for(int i = 0; i < nr ; ++i)
   {
     add_smoke_emitter(-20 + 15*i, -scaling_up + 0.1 * scaling_up ,-20,
-       ScalarMult(SetVector(0,1,0), INIT_VEL));
+       ScalarMult(SetVector(0,1,0), INIT_VEL), false);
   }
 
 }
@@ -175,23 +175,66 @@ GLfloat distance_to(smoke s , vec3 other)
 }
 
 
-void add_smoke_emitter( GLfloat x, GLfloat y, GLfloat z, vec3 look_dir)
+void add_smoke_emitter( GLfloat x, GLfloat y, GLfloat z, vec3 up_vector, bool is_moving)
 {
   if(nr_emitters >= MAX_EMITTERS)
     return;
 
   smoke_emitters[nr_emitters].pos = SetVector(x,y,z);
-  vec3 rot_axis = CrossProduct(look_dir, SetVector(0,1,0));
-  mat4 rot_mat = ArbRotate(rot_axis, 3.1415/2);
-  vec3 up_vector =  Normalize(MultVec3(rot_mat,look_dir));
+//  vec3 rot_axis = CrossProduct(look_dir, SetVector(0,1,0));
+//  mat4 rot_mat = ArbRotate(rot_axis, 3.1415/2);
+//  vec3 up_vector =  Normalize(MultVec3(rot_mat,look_dir));
 
   smoke_emitters[nr_emitters].dir = up_vector;
   smoke_emitters[nr_emitters].T = get_trans_matrix(up_vector);
   smoke_emitters[nr_emitters].inverseT = InvertMat3(smoke_emitters[nr_emitters].T);
-
+  smoke_emitters[nr_emitters].is_moving = is_moving;
   ++nr_emitters;
 
 }
+
+void remove_moving_objects(void)
+{
+  for(int i = 0; i < nr_emitters ; ++i)
+  {
+    if(smoke_emitters[i].is_moving)
+      remove_smoke_emitter(i);
+  }
+  for(int j = 0; j < nr_generators ; ++j)
+  {
+    if(generators[j].is_moving)
+      remove_generator(j);
+  }
+
+  //add_lamps
+}
+
+void remove_last_emitter(void)
+{
+  for(int i = nr_emitters - 1; i >= 0; --i)
+  {
+    if(!smoke_emitters[i].is_moving)
+    {
+      remove_smoke_emitter(i);
+      return;
+    }
+  }
+}
+
+void remove_last_generator(void)
+{
+  for(int i = nr_generators - 1; i >= 0; --i)
+  {
+    if(!generators[i].is_moving)
+    {
+      remove_generator(i);
+      return;
+    }
+  }
+}
+
+
+
 
 //removes a particle at the designated index
 //moves all objects in the list down one step.
@@ -252,7 +295,7 @@ void init_generators(void)
 }
 
 
-void add_field_generator(GLfloat x, GLfloat y, GLfloat z, vec3 look_dir)
+void add_field_generator(GLfloat x, GLfloat y, GLfloat z, vec3 look_dir, bool is_moving)
 {
   if(nr_generators >= MAX_GENERATORS)
     return;
@@ -261,7 +304,8 @@ void add_field_generator(GLfloat x, GLfloat y, GLfloat z, vec3 look_dir)
   generators[nr_generators].dir = look_dir;
   generators[nr_generators].T = get_trans_matrix(look_dir);
   generators[nr_generators].inverseT = InvertMat3(generators[nr_generators].T);
-  printf("%f %f %f \n", generators[nr_generators].pos.x, generators[nr_generators].pos.y, generators[nr_generators].pos.z);
+  generators[nr_generators].is_moving = is_moving;
+//  printf("%f %f %f \n", generators[nr_generators].pos.x, generators[nr_generators].pos.y, generators[nr_generators].pos.z);
   ++nr_generators;
 
 }
