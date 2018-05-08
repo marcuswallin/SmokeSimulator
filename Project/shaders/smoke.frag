@@ -13,6 +13,7 @@ uniform sampler2D bump3;
 
 uniform mat4 camMatrix;
 
+uniform int nrLamps;
 uniform vec3 lightSourcesDirPosArr[6];
 uniform vec3 lightSourcesColorArr[6];
 uniform bool isAlive[6];
@@ -48,7 +49,7 @@ void main(void)
   vec3 color = vec3(0);
   vec3 v = normalize( -exSurface);
   vec3 r;
-  for (int i = 0; i < 6; i++)
+  for (int i = 0; i < nrLamps; i++)
     {
 
       if(!isAlive[i])

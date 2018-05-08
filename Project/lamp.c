@@ -104,6 +104,8 @@ void update_light_sources(GLuint program)
 {
   glUseProgram(program);
 
+  glUniform1i(glGetUniformLocation(program, "nrLamps"), current_lamp_index);
+
   glUniform3fv(glGetUniformLocation(program, "lightSourcesDirPosArr"),
   6, &lightSourcesDirectionsPositions[0].x);
   glUniform1iv(glGetUniformLocation(program, "isAlive"),
@@ -129,7 +131,7 @@ void draw_all_lamps(GLuint program, mat4 mtw, mat4 cam)
 //is_alive should be either 1 for permantent and 2 for moving
 void add_lamp(GLfloat x, GLfloat y, GLfloat z, int is_alive)
 {
-  printf("%i %i %i %i %i %i\n", isAlive[0],isAlive[1], isAlive[2], isAlive[3], isAlive[4], isAlive[5]);
+
   if((current_lamp_index >= 6))
     return;
 
@@ -162,6 +164,8 @@ void remove_lamp(int index)
 
   for(int j = index; j < current_lamp_index -1 ; ++j)
   {
+  //  if(j == current_lamp_index - 1)
+
     isAlive[j] = isAlive[j+1];
     lightSourcesDirectionsPositions[j] = lightSourcesDirectionsPositions[j+1];
   }
