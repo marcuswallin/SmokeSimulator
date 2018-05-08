@@ -482,6 +482,15 @@ mat4 RotateToAxis(vec3 dir)
   return rot;
 }
 
+vec3 GetUpVec(vec3 v)
+{
+  vec3 rot_axis = CrossProduct(v, SetVector(0,1,0));
+  mat4 rot_mat = ArbRotate(rot_axis, 3.1415/2);
+  return Normalize(MultVec3(rot_mat,v));
+
+}
+
+
 // Unnecessary
 // Will probably be removed
 //	void CopyMatrix(GLfloat *src, GLfloat *dest)

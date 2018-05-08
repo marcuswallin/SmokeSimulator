@@ -67,7 +67,7 @@ void add_particle(GLfloat x, GLfloat y, GLfloat z, vec3 init_vel)
 
   vec3 pos = SetVector(x,y,z);
   smoke_array[nr_particles].pos = pos;
-  smoke_array[nr_particles].age = 1;
+  smoke_array[nr_particles].age = 0.1;
   smoke_array[nr_particles].vel = init_vel;
   smoke_array[nr_particles].tex = (float)(nr_particles % 3);
   ++nr_particles;

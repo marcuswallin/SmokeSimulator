@@ -27,7 +27,8 @@ TextureData wall_tex, floor_tex, roof_tex, smoke_tex_1, smoke_tex_2,
 Model *room_model, *floor_model, *roof_model, *billboard_model, *fan_model, *emitter_model;
 void draw_room_model(Model *mod, mat4 mtw, mat4 cam, GLfloat trans);
 
-void keyboard_interaction(vec3 pos, vec3 look_dir);
+void keyboard_interaction(vec3 pos, vec3 look_dir, vec3 up_vec);
+void change_state(int new_state);
 
 int scaling_room_side = 75;
 int scaling_room_up = 15;
@@ -106,7 +107,9 @@ void display(void)
 
 	vec3 look_dir = get_look_dir();
 	vec3 view_pos = get_view_pos();
-  keyboard_interaction(view_pos,look_dir);
+  vec3 up_vec = GetUpVec(look_dir);
+  keyboard_interaction(view_pos,look_dir, up_vec);
+
 
 	//DRAW ROOM----------------------------------------------
 
@@ -126,7 +129,7 @@ void display(void)
 	glDisable(GL_DEPTH_TEST);
 	glUseProgram(program_billboard);
 	update_light_sources(program_billboard);
-	spawn_smoke();
+	spawn_smoke(up_vec);
 	smoke_interact_vector_field(t);
 	send_smoke_to_GPU(VectorSub(SetVector(0,0,0), look_dir));
 	draw_billboard(billboard_model, mtw_matrix, cam_matrix, program_billboard);
@@ -170,35 +173,126 @@ void lightToShader(GLuint program)
 
 }
 
-
+bool one_down = false;
 bool e_down = false;
-bool r_down = false;
-bool g_down = false;
-bool q_down = false;
-void keyboard_interaction(vec3 pos, vec3 look_dir)
-{
-	if(glutKeyIsDown('q') && !q_down)
-	{
- 		q_down = true;
- 		add_lamp(pos.x + look_dir.x * 6 ,pos.y + look_dir.y * 6 - 3 , pos.z + look_dir.z * 6);
- 	}
-	else if(!glutKeyIsDown('q') && q_down)
- 	{
- 		q_down = false;
- 	}
- 	if(glutKeyIsDown('t'))
-	{
- 		clear_lamps(program_room);
-	}
+bool three_down = false;
+bool mouse_down = false;
+bool four_down = false;
+int player_mode = 1;
+int old_player_mode = 1;
 
+bool key_is_down = false;
+bool moving_object = false;
+void keyboard_interaction(vec3 pos, vec3 look_dir, vec3 up_vec)
+{
+  vec3 dist = ScalarMult(look_dir, 8);
+
+  vec3 d = ScalarMult(up_vec, 3);
+
+//CHECK IF CHANGE OF STATES-----------------------------
+  if(glutKeyIsDown('1') && !key_is_down)
+  {
+    change_state(1);
+  }
+  else if(glutKeyIsDown('2') &&  !key_is_down)
+  {
+    change_state(2);
+  }
+  else if(glutKeyIsDown('3') &&  !key_is_down)
+  {
+    change_state(3);
+  }
+  else if(glutKeyIsDown('4') && !key_is_down)
+  {
+    change_state(4);
+  }
+  else if((!glutKeyIsDown('1') || !glutKeyIsDown('2') ||
+          !glutKeyIsDown('3') || !glutKeyIsDown('4')) &&
+  key_is_down)
+    key_is_down = false;
+
+
+  //CHANGE POSITION OF CURRENTLY HELD OBJECT--------------------------------
+  remove_moving_objects();
+  remove_moving_lamp();
+  if(player_mode == 2)
+  {
+    add_lamp(pos.x + look_dir.x * 6 ,pos.y + look_dir.y * 6 - 3 , pos.z + look_dir.z * 6, 2);
+  }
+  else if(player_mode == 3)
+  {
+    add_smoke_emitter(pos.x+dist.x-d.x, pos.y +dist.y-d.y, pos.z+dist.z-d.z, up_vec, true);
+  }
+  else if(player_mode == 4)
+  {
+    add_field_generator(pos.x+dist.x-d.x, pos.y +dist.y-d.y, pos.z+dist.z-d.z, look_dir, true);
+  }
+
+
+//If mouse is pressed add new object---------------------------------------
+  if(glutMouseIsDown(1) && !mouse_down)
+  {
+    mouse_down = true;
+    if (player_mode == 2)
+    {
+      add_lamp(pos.x + look_dir.x * 6 ,pos.y + look_dir.y * 6 - 3 , pos.z + look_dir.z * 6, 1);
+    }
+    if (player_mode == 3)
+    {
+      add_smoke_emitter(pos.x+dist.x-d.x, pos.y +dist.y-d.y, pos.z+dist.z-d.z, up_vec, false);
+    }
+    else if(player_mode == 4)
+    {
+      add_field_generator(pos.x+dist.x-d.x, pos.y +dist.y-d.y, pos.z+dist.z-d.z, look_dir, false);
+    }
+  }
+  else if(!glutMouseIsDown(1)  && mouse_down)
+    mouse_down = false;
+
+
+  //remove object ie (erase) is pressed---------------------------------------
   if(glutKeyIsDown('e') && !e_down)
   {
     e_down = true;
-    add_smoke_emitter(pos.x, pos.y, pos.z, look_dir);
-  //  add_smoke_emitter(pos.x,-roof_height + 0.1 * roof_height,pos.z);
+    if (player_mode == 2 && current_lamp_index > 1)
+    {
+      remove_lamp(0);
+    }
+    if (player_mode == 3 && nr_emitters > 1)
+    {
+      remove_smoke_emitter(0);
+    }
+    else if(player_mode == 4 && nr_generators > 1)
+    {
+      remove_generator(0);
+    }
   }
-  else if(!glutKeyIsDown('e') && e_down)
+  else if(!glutKeyIsDown('e')  && e_down)
     e_down = false;
+
+
+/*
+	if(glutKeyIsDown('2') && !q_down)
+	{
+    player_mode =2;
+ 		q_down = true;
+ 		add_lamp(pos.x + look_dir.x * 6 ,pos.y + look_dir.y * 6 - 3 , pos.z + look_dir.z * 6);
+ 	}
+	else if(!glutKeyIsDown('2') && q_down)
+ 	{
+ 		q_down = false;
+ 	}*/
+/*
+ 	if(glutKeyIsDown('e') && !e_down)
+	{
+    e_down = true;
+    if(player_mode == 2)
+ 		  clear_lamps(program_room);
+    else if(player_mode == 3)
+      remove_smoke_emitter(0);
+	}
+  else if(!glutKeyIsDown('e') && e_down)
+
 
 
   if(glutKeyIsDown('r') && nr_emitters > 0 && !r_down)
@@ -208,14 +302,22 @@ void keyboard_interaction(vec3 pos, vec3 look_dir)
   }
   else if(!glutKeyIsDown('r') && r_down)
     r_down = false;
-
-
-  if(glutKeyIsDown('g') && !g_down)
+*/
+/*
+  if(glutMouseIsDown(1) && !mouse_down)
   {
-    g_down = true;
+    mouse_down = true;
     add_field_generator(pos.x,pos.y,pos.z, look_dir);
   }
-  else if(!glutKeyIsDown('g') && g_down)
-    g_down = false;
-
+  else if(!glutMouseIsDown(1)  && mouse_down)
+    mouse_down = false;
+*/
+}
+//possibly return old state
+void change_state(int new_state)
+{
+    player_mode = new_state;
+    key_is_down = true;
+    remove_moving_objects();
+    remove_moving_lamp();
 }
