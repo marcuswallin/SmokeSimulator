@@ -65,11 +65,11 @@ void init(void)
 
 	//TEXTURES
 	glActiveTexture(GL_TEXTURE0);
-	LoadTGATexture("objects/wallpaper_3.tga", &wall_tex);
+	LoadTGATexture("objects/flat_walls_2.tga", &wall_tex);
 	glActiveTexture(GL_TEXTURE1);
-	LoadTGATexture("objects/floor_2.tga", &floor_tex);
+	LoadTGATexture("objects/floor_tiling_small.tga", &floor_tex);
 	glActiveTexture(GL_TEXTURE2);
-	LoadTGATexture("objects/roof_1.tga", &roof_tex);
+	LoadTGATexture("objects/roof_metal_grid.tga", &roof_tex);
 	glActiveTexture(GL_TEXTURE3);
 	LoadTGATexture("objects/smoke_texture_1.tga", &smoke_tex_1);
 	glActiveTexture(GL_TEXTURE4);

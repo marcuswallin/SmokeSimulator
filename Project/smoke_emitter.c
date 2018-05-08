@@ -86,8 +86,8 @@ void smoke_interact_vector_field(int t)
   {
     if(smoke_array[i].age > MAX_AGE)
     {
-      remove_particle(i);
-      --i;
+       remove_particle(i);
+       --i;
     }
     else
     {
@@ -100,8 +100,17 @@ void smoke_interact_vector_field(int t)
 //which is later added to the particle's position.
 void interact_vector_field(smoke *s )
 {
+  float f;
 
-   float f = 0.006;
+if(s->age < MAX_AGE-2)
+{
+   f = 0.001*(powf(s->age, 2)+s->age);
+ }
+ else
+ {
+   f = 0.001/s->age;
+ }
+
    s->vel.x += f*((float)rand()/ RAND_MAX - 0.5);
    s->vel.z += f*((float)rand()/ RAND_MAX - 0.5);
 
@@ -110,10 +119,18 @@ void interact_vector_field(smoke *s )
    s->age += (GLfloat) 1/GROWTH_FACTOR;
 
    //apply friction
+   if (s->age < MAX_AGE -6)
+   {
    s->vel.x = s->vel.x*FRICTION;
    s->vel.y = s->vel.y*FRICTION;
    s->vel.z = s->vel.z*FRICTION;
-
+   }
+   else
+   {
+     s->vel.x = s->vel.x*(FRICTION+0.004);
+     s->vel.y = s->vel.y*(FRICTION+0.004);
+     s->vel.z = s->vel.z*(FRICTION+0.004);
+   }
    //update position
    s->pos.x += s->vel.x;
    s->pos.y += s->vel.y;
@@ -125,7 +142,7 @@ void interact_vector_field(smoke *s )
 void roof_interaction(smoke  *s)
 {
   GLfloat diff = roof_height - s->pos.y;
-  s->vel.y = (Y_VELOCITY + s->vel.y)*(1-(float)1/(10*diff));
+  s->vel.y = (Y_VELOCITY + s->vel.y)*(1-(float)1/(50*diff));
 }
 
 void field_generator_interaction(smoke *s)

@@ -4,7 +4,7 @@
 
 #define MAX_GENERATORS 4
 #define MAX_EMITTERS 4
-#define SPAWN_FREQUENCY 5
+#define SPAWN_FREQUENCY 2
 #define GROWTH_FACTOR 100
 #define MAX_AGE 8.0
 #define FRICTION 0.98
