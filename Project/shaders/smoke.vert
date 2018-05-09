@@ -19,13 +19,12 @@ uniform mat4 mtwMatrix;
 
 void main(void)
 {
-//  vec3 pos = data_SSBO[0];
+
   mat4 mtw_modified = mtwMatrix;
   float instance = float(gl_InstanceID);
   float nr = float(nrParticles);
 
   float v = instance / nr + 1.0/1000000;
-  //float vel_and_tex = (instance * 2 + 1) / nr + 1.0/1000000;
   vec4 texVal  = texture(smokePos, vec2(0, v));
   vec4 vel_and_tex_vec = texture(smokePos, vec2(0.5, v));
   tex_choice = vel_and_tex_vec.w;

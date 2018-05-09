@@ -18,6 +18,10 @@ void init_smoke(void)
   glUseProgram(program_billboard);
   //int nr = 0;
   smoke_array = malloc (MAX_PARTICLES * sizeof (smoke));
+
+  add_particle(-3,0,0,SetVector(0,0,0));
+  add_particle(0,0,0,SetVector(0,0,0));
+  add_particle(3,0,0,SetVector(0,0,0));
 /*
   for(int i = 0; i < nr; ++i)
   {
@@ -51,7 +55,7 @@ void init_smoke(void)
     glActiveTexture(GL_TEXTURE15);
   //  glUniform1i(glGetUniformLocation(program_billboard, "smokePos"), 15);
     glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles );
-    quick_sort(smoke_array, 0, nr_particles-1, look_dir);
+  //  quick_sort(smoke_array, 0, nr_particles-1, look_dir);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 2, nr_particles, 0,
       GL_RGBA, GL_FLOAT, &smoke_array[0].pos.x);
 

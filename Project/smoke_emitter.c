@@ -120,18 +120,18 @@ void interact_vector_field(smoke *s )
    s->age += (GLfloat) 1/GROWTH_FACTOR;
 
    //apply friction
-   if (s->age < MAX_AGE -6)
-   {
+//   if (s->age < MAX_AGE -6)
+//   {
    s->vel.x = s->vel.x*FRICTION;
    s->vel.y = s->vel.y*FRICTION;
    s->vel.z = s->vel.z*FRICTION;
-   }
-   else
+//   }
+/*   else
    {
      s->vel.x = s->vel.x*(FRICTION+0.004);
      s->vel.y = s->vel.y*(FRICTION+0.004);
      s->vel.z = s->vel.z*(FRICTION+0.004);
-   }
+   }*/
    //update position
    s->pos.x += s->vel.x;
    s->pos.y += s->vel.y;
@@ -176,11 +176,11 @@ void field_generator_interaction(smoke *s)
     s->vel.z = new_speed_old_sys.z;
 
     //makes particles age quicker when blown by a fan
-    if(rel_pos_gen.z < 1)
+  /*  if(rel_pos_gen.z < 1)
       s->age += 1/(GROWTH_FACTOR);
     else
       s->age += 1/(GROWTH_FACTOR*rel_pos_gen.z);
-
+*/
 
   }
 }

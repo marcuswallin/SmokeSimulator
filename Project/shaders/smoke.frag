@@ -22,7 +22,7 @@ in vec3 exSurface;
 
 void main(void)
 {
-  vec4 tex_color;// = texture(tex2, texCoord);
+  vec4 tex_color;
   vec3 exNormal;
   if(tex_choice < 0.5)
   {
@@ -45,10 +45,9 @@ void main(void)
      exNormal = vec3(0.0, 0.0, 1.0);
   }
 
-  float diffuse, specular, shade;
+  float diffuse, shade;
   vec3 color = vec3(0);
-  vec3 v = normalize( -exSurface);
-  vec3 r;
+
   for (int i = 0; i < nrLamps; i++)
     {
 
@@ -56,8 +55,7 @@ void main(void)
         continue;
 
       vec3 light = lightSourcesDirPosArr[i];
-      vec3 lightView;
-      lightView = vec3(camMatrix* vec4(light, 1.0));
+      vec3 lightView = vec3(camMatrix* vec4(light, 1.0));
 
       float energy = 150 / (0.6* pow((1 + length( lightView - exSurface)), 2));
       float intensity = clamp(energy, 0 ,1);
@@ -67,5 +65,5 @@ void main(void)
       color = color + intensity * (vec3(shade) * lightSourcesColorArr[i]);
      }
 
-  outColor = vec4(vec3(tex_color)*color, tex_color.w* 0.85/(pow((age+1),2)));
+  outColor = vec4(vec3(tex_color)*color, tex_color.w * 0.85/(pow((age+1),2)));
 }
