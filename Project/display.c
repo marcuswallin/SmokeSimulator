@@ -130,7 +130,7 @@ void display(void)
 	glUseProgram(program_billboard);
 	update_light_sources(program_billboard);
 	spawn_smoke(up_vec);
-	smoke_interact_vector_field(t);
+	//smoke_interact_vector_field(t);
 	send_smoke_to_GPU(VectorSub(SetVector(0,0,0), look_dir));
 	draw_billboard(billboard_model, mtw_matrix, cam_matrix, program_billboard);
   glEnable(GL_DEPTH_TEST);

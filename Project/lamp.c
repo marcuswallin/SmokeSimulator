@@ -62,6 +62,7 @@ void initLamp(mat4 proj_matrix)
 	glUniformMatrix4fv(glGetUniformLocation(program_lamp, "projMatrix"), 1, GL_TRUE, proj_matrix.m);
 
   add_lamp(0, 5, 20, 1);
+  //add_lamp(0, 5, 20, 1);
 
 
 }

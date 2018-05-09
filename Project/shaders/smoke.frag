@@ -65,5 +65,5 @@ void main(void)
       color = color + intensity * (vec3(shade) * lightSourcesColorArr[i]);
      }
 
-  outColor = vec4(vec3(tex_color)*color, tex_color.w * 0.85/(pow((age+1),2)));
+  outColor = vec4(vec3(tex_color)*color, tex_color.w );//* 0.85/(pow((age+1),2)));
 }

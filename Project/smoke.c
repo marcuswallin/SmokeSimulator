@@ -22,6 +22,7 @@ void init_smoke(void)
   add_particle(-3,0,0,SetVector(0,0,0));
   add_particle(0,0,0,SetVector(0,0,0));
   add_particle(3,0,0,SetVector(0,0,0));
+  //quick_sort(smoke_array, 0, nr_particles-1, SetVector(-1,0,0));
 /*
   for(int i = 0; i < nr; ++i)
   {
@@ -71,7 +72,7 @@ void add_particle(GLfloat x, GLfloat y, GLfloat z, vec3 init_vel)
 
   vec3 pos = SetVector(x,y,z);
   smoke_array[nr_particles].pos = pos;
-  smoke_array[nr_particles].age = 0.1;
+  smoke_array[nr_particles].age = 0.7;
   smoke_array[nr_particles].vel = init_vel;
   smoke_array[nr_particles].tex = (float)(nr_particles % 3);
   ++nr_particles;
