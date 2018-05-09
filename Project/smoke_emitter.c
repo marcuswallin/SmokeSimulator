@@ -43,8 +43,8 @@ void spawn_smoke()
     if(r_num % SPAWN_FREQUENCY == 0)
     {
       vec3 up_vec = smoke_emitters[i].dir;
-      float start_x = (float) r_num / RAND_MAX - 0.5;
-      float start_y = (float) rand() / RAND_MAX - 0.5;
+    //  float start_x = (float) r_num / RAND_MAX - 0.5;
+    //  float start_y = (float) rand() / RAND_MAX - 0.5;
       vec3 e = smoke_emitters[i].pos;
       vec3 init_vel = ScalarMult(smoke_emitters[i].dir, INIT_VEL);
       add_particle(e.x+up_vec.x, e.y+up_vec.y, e.z+up_vec.z, init_vel);
