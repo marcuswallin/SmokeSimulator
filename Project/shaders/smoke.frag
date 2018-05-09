@@ -24,7 +24,7 @@ void main(void)
 {
   vec4 tex_color;
   vec3 exNormal;
-  if(tex_choice < 0.5)
+ if(tex_choice < 0.5)
   {
     tex_color = texture(tex1, texCoord);
     exNormal = vec3(texture(bump1, texCoord));
@@ -65,5 +65,5 @@ void main(void)
       color = color + intensity * (vec3(shade) * lightSourcesColorArr[i]);
      }
 
-  outColor = vec4(vec3(tex_color)*color, tex_color.w * 0.85/(pow((age+1),2)));
+  outColor = vec4(vec3(tex_color)*color, tex_color.w * 0.85 /(pow((age+1),2)));
 }
