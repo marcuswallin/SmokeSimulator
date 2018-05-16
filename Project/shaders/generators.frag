@@ -13,6 +13,7 @@ uniform int nrLamps;
 in vec3 exSurface;
 in vec3 exNormal;
 
+//diffuse and specular shading for emitters and generators
 void main(void)
 {
   float diffuse, specular, shade;

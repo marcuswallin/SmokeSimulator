@@ -13,6 +13,7 @@ uniform int nrLamps;
 in vec3 exSurface;
 in vec3 exNormal;
 
+//diffuse and specular shading for walls, roof and floor.
 void main(void)
 {
   float diffuse, specular, shade;
@@ -21,7 +22,6 @@ void main(void)
   vec3 r;
   for (int i = 0; i < nrLamps; i++)
   {
-
     vec3 light = lightSourcesDirPosArr[i];
     vec3 lightView;
     lightView = vec3(camMatrix* vec4(light, 1.0));
@@ -40,8 +40,6 @@ void main(void)
     }
 
     specular = clamp(specular, 0, 1);
-
-    //shade =  diffuse + specular;
 
     if(isAlive[i])
     {

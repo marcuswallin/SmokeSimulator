@@ -19,6 +19,7 @@ int x = 0;
 int y = 0;
 mat4 trans, rot;
 int room_size_roof, room_size_walls;
+vec3 get_view_pos(void);
 
 
 void initControls(int size_walls, int size_roof)
@@ -31,19 +32,20 @@ void initControls(int size_walls, int size_roof)
   glutHideCursor();
 }
 
+//called by mouse().
+//calculates the new rotation angles of the camera in polar coordinates.
 void cameraRotation()
 {
 
   int distance_middle_x = x - (int)glutGet(GLUT_WINDOW_WIDTH) / 2;
   int distance_middle_y = y - (int)glutGet(GLUT_WINDOW_HEIGHT) / 2;
-  //  printf("%i %i\n", distance_middle_x, distance_middle_y);
   int k = 3000;
   delta_theta = (GLfloat) distance_middle_x / k;
   delta_phi = (GLfloat) distance_middle_y / k;
 
-  //  printf("%f %f\n", delta_theta, delta_phi);
 }
 
+//looks where the mouse is placed.
 void mouse(int x1,int y1)
 {
   int center_x = (int)glutGet(GLUT_WINDOW_WIDTH) / 2;
@@ -94,23 +96,24 @@ mat4 cameraPlacement()
 
   rot = Mult(Ry(old_theta), Rx(M_PI /2 - old_phi));
 
-  return  lookAtv(MultVec3(trans, p),
+  return  lookAtv(get_view_pos(),
   MultVec3(Mult(trans, Mult( T(p.x, p.y, p.z),
   Mult(rot, T(-p.x, -p.y, -p.z)))), l) ,
   v);
 }
 
+//returns the world coordinates of the viewer.
 vec3 get_view_pos(void)
 {
   return MultVec3(trans, p);
 }
 
-
+//returns the look direction of the viewer.
 vec3 get_look_dir(void)
 {
   vec3 tmp_l = MultVec3(Mult(trans, Mult( T(p.x, p.y, p.z),
                                           Mult(rot, T(-p.x, -p.y, -p.z)))), l);
-  vec3 tmp_p = MultVec3(trans, p);
+  vec3 tmp_p = get_view_pos();
   vec3 look_dir = Normalize(VectorSub(tmp_l,tmp_p));
   return look_dir;
 }

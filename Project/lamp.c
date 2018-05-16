@@ -6,44 +6,7 @@
 #include "GL_utilities.h"
 #include <math.h>
 #include "VectorUtils3.h"
-
-GLuint program_lamp, program_cord;
-Model *lamp_model, *cord_model;
-
-GLuint current_lamp_index = 0;
-
-mat4 projectionMatrix;
-
-void draw_lamp_model(Model *mod, mat4 mtw, mat4 cam, GLfloat trans_x, GLfloat trans_y, GLfloat trans_z);
-void draw_cord_model(Model *mod, mat4 mtw, mat4 cam, GLfloat trans_x, GLfloat trans_y, GLfloat trans_z);
-void draw_lamp_with_cord(GLuint program, mat4 mtw, mat4 cam, GLfloat x,GLfloat y,GLfloat z);
-void add_lamp(GLfloat x, GLfloat y, GLfloat z, int);
-void initLamp();
-void clear_lamps(GLuint program);
-void draw_all_lamps(GLuint program, mat4 mtw, mat4 cam);
-void remove_lamp(int index);
-
-Point3D lightSourcesColorsArr[] = {
-{0.95f,0.95f,0.7f},
-{0.95f,0.95f,0.7f},
-{0.95f,0.95f,0.7f},
-{0.95f,0.95f,0.7f},
-{0.95f,0.95f,0.7f},
-{0.95f,0.95f,0.7f}
-
-};
-
-GLint isAlive[] = {0, 0, 0, 0, 0, 0};
-
-
-Point3D lightSourcesDirectionsPositions[] = {
-{100.0f, 100.0f,100.0f},
-{100.0f, 100.0f,100.0f},
-{100.0f, 100.0f,100.0f},
-{100.0f, 100.0f,100.0f},
-{100.0f, 100.0f,100.0f},
-{100.0f, 100.0f,100.0f}
-};
+#include "lamp.h"
 
 
 void initLamp(mat4 proj_matrix)
@@ -62,8 +25,6 @@ void initLamp(mat4 proj_matrix)
 	glUniformMatrix4fv(glGetUniformLocation(program_lamp, "projMatrix"), 1, GL_TRUE, proj_matrix.m);
 
   add_lamp(0, 5, 20, 1);
-
-
 }
 
 
@@ -85,8 +46,6 @@ void draw_cord_model(Model *mod, mat4 mtw, mat4 cam, GLfloat x_trans, GLfloat y_
 
 void draw_lamp_with_cord(GLuint program, mat4 mtw, mat4 cam, GLfloat x, GLfloat y, GLfloat z)
 {
-
-
 	//DRAW LAMP------------------------------------------------
 	glUseProgram(program_lamp);
 	mtw = S(0.7,0.7,0.7);
@@ -97,15 +56,13 @@ void draw_lamp_with_cord(GLuint program, mat4 mtw, mat4 cam, GLfloat x, GLfloat 
 	mtw = S(5,4,5);
 
 	draw_cord_model(cord_model,mtw, cam, x, y+20, z);
-
 }
 
+//sends information about light sources to the GPU.
 void update_light_sources(GLuint program)
 {
   glUseProgram(program);
-
   glUniform1i(glGetUniformLocation(program, "nrLamps"), current_lamp_index);
-
   glUniform3fv(glGetUniformLocation(program, "lightSourcesDirPosArr"),
   6, &lightSourcesDirectionsPositions[0].x);
   glUniform1iv(glGetUniformLocation(program, "isAlive"),
@@ -127,7 +84,7 @@ void draw_all_lamps(GLuint program, mat4 mtw, mat4 cam)
   }
 }
 
-//need to reset isAlive to zero.
+
 //is_alive should be either 1 for permantent and 2 for moving
 void add_lamp(GLfloat x, GLfloat y, GLfloat z, int is_alive)
 {
@@ -135,7 +92,6 @@ void add_lamp(GLfloat x, GLfloat y, GLfloat z, int is_alive)
   if((current_lamp_index >= 6))
     return;
 
-  //printf("%i\n", current_lamp_index);
   lightSourcesDirectionsPositions[current_lamp_index].x = x;
   lightSourcesDirectionsPositions[current_lamp_index].y = y;
   lightSourcesDirectionsPositions[current_lamp_index].z = z;
@@ -144,7 +100,7 @@ void add_lamp(GLfloat x, GLfloat y, GLfloat z, int is_alive)
 
 }
 
-//these two does not work properly
+//removes a moving lamp, which is a lamp we hold in our hand.
 void remove_moving_lamp(void)
 {
   for(int i = 0; i < 6; ++i)
@@ -156,7 +112,8 @@ void remove_moving_lamp(void)
     }
   }
 }
-//same
+
+//removes a lamp at a designated index.
 void remove_lamp(int index)
 {
   if (index >= current_lamp_index || index < 0)
@@ -164,8 +121,6 @@ void remove_lamp(int index)
 
   for(int j = index; j < current_lamp_index -1 ; ++j)
   {
-  //  if(j == current_lamp_index - 1)
-
     isAlive[j] = isAlive[j+1];
     lightSourcesDirectionsPositions[j] = lightSourcesDirectionsPositions[j+1];
   }

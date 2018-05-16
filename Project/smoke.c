@@ -9,28 +9,14 @@
 #include <math.h>
 #include "VectorUtils3.h"
 #include "loadobj.h"
-//#include "smoke_emitter.h"
 #include "smoke.h"
 
 //initialises a number of smoke particles.
 void init_smoke(void)
 {
   glUseProgram(program_billboard);
-  //int nr = 0;
+
   smoke_array = malloc (MAX_PARTICLES * sizeof (smoke));
-
-  add_particle(-3,0,0,SetVector(0,0,0));
-  add_particle(0,0,0,SetVector(0,0,0));
-  add_particle(3,0,0,SetVector(0,0,0));
-/*
-  for(int i = 0; i < nr; ++i)
-  {
-    add_particle( 5*cos(i*3.1415/(nr/2) ),0, 5*sin(i*3.1415/(nr/2)));
-  }
-
-  if(nr_particles > 0)
-    quick_sort(smoke_array, 0, nr_particles - 1, SetVector(1,0,0));
-*/
 
   glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles);
 
@@ -53,9 +39,8 @@ void init_smoke(void)
   {
     glUseProgram(program_billboard);
     glActiveTexture(GL_TEXTURE15);
-  //  glUniform1i(glGetUniformLocation(program_billboard, "smokePos"), 15);
     glUniform1i(glGetUniformLocation(program_billboard, "nrParticles"), nr_particles );
-  //  quick_sort(smoke_array, 0, nr_particles-1, look_dir);
+    quick_sort(smoke_array, 0, nr_particles-1, look_dir);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 2, nr_particles, 0,
       GL_RGBA, GL_FLOAT, &smoke_array[0].pos.x);
 
@@ -94,7 +79,7 @@ void remove_particle(int index)
   --nr_particles;
 }
 
-
+//draws all smoke billboards. using Instancing of course.
 void draw_billboard(Model *mod, mat4 mtw, mat4 cam, GLuint billboard_prog)
 {
 	glActiveTexture(GL_TEXTURE3);
@@ -132,7 +117,7 @@ void quick_sort( smoke a[], int l, int r, vec3 look_dir)
 }
 
 
-
+//used for quick sort.
 int partition( smoke a[], int l, int r, vec3 look_dir) {
    int i, j;
    smoke t;

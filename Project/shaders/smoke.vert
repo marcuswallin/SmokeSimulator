@@ -17,6 +17,7 @@ uniform mat4 projMatrix;
 uniform mat4 camMatrix;
 uniform mat4 mtwMatrix;
 
+//shader for view plane oriented billboards
 void main(void)
 {
 
@@ -43,7 +44,7 @@ void main(void)
 
   age = texVal.w;
 	texCoord = inTexCoord;
-  //for light
+
   exSurface = (tot * vec4(inPosition, 1.0)).xyz;
 
 }

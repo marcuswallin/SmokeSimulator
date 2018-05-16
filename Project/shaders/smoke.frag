@@ -24,6 +24,7 @@ void main(void)
 {
   vec4 tex_color;
   vec3 exNormal;
+  //checks what texture to use.
  if(tex_choice < 0.5)
   {
     tex_color = texture(tex1, texCoord);

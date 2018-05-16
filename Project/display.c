@@ -10,9 +10,7 @@
 #include "LoadTGA.h"
 #include "cameracontrol.c"
 #include "smoke.c"
-
 #include "smoke_emitter.c"
-
 #include "lamp.c"
 
 
@@ -36,8 +34,6 @@ int scaling_room_up = 15;
 
 void init(void)
 {
-	printf("%f\n", acos(-1));
-
 	glClearColor(0.2,0.2,0.5,0);
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
@@ -66,7 +62,7 @@ void init(void)
 
 	//TEXTURES
 	glActiveTexture(GL_TEXTURE0);
-	LoadTGATexture("objects/flat_walls_2.tga", &wall_tex);
+	LoadTGATexture("objects/flat_walls.tga", &wall_tex);
 	glActiveTexture(GL_TEXTURE1);
 	LoadTGATexture("objects/floor_tiling_small.tga", &floor_tex);
 	glActiveTexture(GL_TEXTURE2);
@@ -94,7 +90,7 @@ void init(void)
 }
 
 
-int t = 0;
+
 
 void display(void)
 {
@@ -104,12 +100,10 @@ void display(void)
 	cam_matrix = cameraPlacement();
 	mtw_matrix = IdentityMatrix();
 
-
 	vec3 look_dir = get_look_dir();
 	vec3 view_pos = get_view_pos();
   vec3 up_vec = GetUpVec(look_dir);
   keyboard_interaction(view_pos,look_dir, up_vec);
-
 
 	//DRAW ROOM----------------------------------------------
 
@@ -130,7 +124,7 @@ void display(void)
 	glUseProgram(program_billboard);
 	update_light_sources(program_billboard);
 	spawn_smoke(up_vec);
-	smoke_interact_vector_field(t);
+	smoke_interact_vector_field();
 	send_smoke_to_GPU(VectorSub(SetVector(0,0,0), look_dir));
 	draw_billboard(billboard_model, mtw_matrix, cam_matrix, program_billboard);
   glEnable(GL_DEPTH_TEST);
@@ -144,10 +138,9 @@ void display(void)
   update_light_sources(program_room);
   draw_all_lamps(program_generators, mtw_matrix, cam_matrix);
 
-	t++;
-
 	glutSwapBuffers();
 }
+
 
 void draw_room_model(Model *mod, mat4 mtw, mat4 cam, GLfloat trans)
 {
@@ -164,25 +157,17 @@ void lightToShader(GLuint program)
 	glUseProgram(program);
 	glUniformMatrix4fv(glGetUniformLocation(program, "projMatrix"), 1, GL_TRUE, projectionMatrix.m);
 
-	//glUniform3fv(glGetUniformLocation(program, "lightSourcesDirPosArr"),
-	//4, &lightSourcesDirectionsPositions[0].x);
 	glUniform3fv(glGetUniformLocation(program, "lightSourcesColorArr"),
 	6, &lightSourcesColorsArr[0].x);
-	//glUniform1iv(glGetUniformLocation(program, "isDirectional"),
-	//4, isDirectional);
 
 }
 
-bool one_down = false;
-bool e_down = false;
-bool three_down = false;
-bool mouse_down = false;
-bool four_down = false;
-int player_mode = 1;
-int old_player_mode = 1;
 
+bool e_down = false;
+bool mouse_down = false;
+int player_mode = 1;
 bool key_is_down = false;
-bool moving_object = false;
+//lets the user interact with the simulation
 void keyboard_interaction(vec3 pos, vec3 look_dir, vec3 up_vec)
 {
   vec3 dist = ScalarMult(look_dir, 8);
@@ -270,50 +255,10 @@ void keyboard_interaction(vec3 pos, vec3 look_dir, vec3 up_vec)
   else if(!glutKeyIsDown('e')  && e_down)
     e_down = false;
 
-
-/*
-	if(glutKeyIsDown('2') && !q_down)
-	{
-    player_mode =2;
- 		q_down = true;
- 		add_lamp(pos.x + look_dir.x * 6 ,pos.y + look_dir.y * 6 - 3 , pos.z + look_dir.z * 6);
- 	}
-	else if(!glutKeyIsDown('2') && q_down)
- 	{
- 		q_down = false;
- 	}*/
-/*
- 	if(glutKeyIsDown('e') && !e_down)
-	{
-    e_down = true;
-    if(player_mode == 2)
- 		  clear_lamps(program_room);
-    else if(player_mode == 3)
-      remove_smoke_emitter(0);
-	}
-  else if(!glutKeyIsDown('e') && e_down)
-
-
-
-  if(glutKeyIsDown('r') && nr_emitters > 0 && !r_down)
-  {
-    r_down = true;
-    remove_smoke_emitter(0);
-  }
-  else if(!glutKeyIsDown('r') && r_down)
-    r_down = false;
-*/
-/*
-  if(glutMouseIsDown(1) && !mouse_down)
-  {
-    mouse_down = true;
-    add_field_generator(pos.x,pos.y,pos.z, look_dir);
-  }
-  else if(!glutMouseIsDown(1)  && mouse_down)
-    mouse_down = false;
-*/
 }
-//possibly return old state
+
+//changes the player_mode to the new state
+//also removes old objects.
 void change_state(int new_state)
 {
     player_mode = new_state;

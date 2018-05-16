@@ -7,7 +7,7 @@ out vec2 texCoord;
 out vec3 exNormal;
 out vec3 exSurface;
 
-// NY
+
 uniform mat4 projMatrix;
 uniform mat4 mdlMatrix;
 

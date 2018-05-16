@@ -2,11 +2,10 @@
 #ifndef SMOKE_EMITTER_H
 #define SMOKE_EMITTER_H
 
+//parameters that modify the smoke's interaction with the vector field.
 #define MAX_GENERATORS 4
-
 #define MAX_EMITTERS 4
 #define SPAWN_FREQUENCY 5
-
 #define GROWTH_FACTOR 100
 #define MAX_AGE 6.0
 #define FRICTION 0.98
@@ -14,6 +13,7 @@
 #define FIELD_STRENGTH 0.03
 #define SPREAD 0.002
 #define INIT_VEL 0.2
+
 int nr_emitters = 0;
 int nr_generators = 0;
 int roof_height;
@@ -46,7 +46,7 @@ void roof_interaction(smoke  *s);
 void draw_fans_and_emitters(GLuint program, mat4 cam,Model *fan, Model *emitter);
 void spawn_smoke();
 void interact_vector_field(smoke *s );
-void smoke_interact_vector_field(int t);
+void smoke_interact_vector_field(void);
 
 GLfloat distance_to(smoke s , vec3 emitter);
 

@@ -12,7 +12,6 @@ typedef struct smoke
   GLfloat age;
   vec3 vel;
   GLfloat tex;
-//  GLfloat rot;
 } smoke;
 
 GLuint program_billboard;
@@ -24,7 +23,7 @@ void draw_billboard(Model *mod, mat4 mtw, mat4 cam, GLuint billboard_prog);
 
 int partition( smoke a[], int l, int r, vec3 look_vec);
 void quick_sort( smoke a[], int l, int r, vec3 look_vec);
-//GLfloat* convert_to_array(void);
+
 GLuint smoke_pos_texdata;
 
 #endif
